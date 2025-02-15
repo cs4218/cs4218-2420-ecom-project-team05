@@ -14,6 +14,9 @@ export const registerController = async (req, res) => {
     if (!email) {
       return res.send({ message: "Email is Required" });
     }
+    if (!validator.isEmail(email)) {
+      return res.status(400).send("Invalid email format");
+    }
     if (!password) {
       return res.send({ message: "Password is Required" });
     }
