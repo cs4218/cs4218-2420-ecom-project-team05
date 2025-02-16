@@ -440,7 +440,7 @@ describe('updateProfileController unit tests', () => {
     await updateProfileController(req, res);
 
     expect(res.json).toHaveBeenCalledWith({
-      error: 'Passsword is required and 6 character long'
+      error: 'Passsword is required and 6 characters long'
     });
   });
 
@@ -476,7 +476,7 @@ describe('updateProfileController unit tests', () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: 'Profile Updated SUccessfully',
+      message: 'Profile Updated Successfully',
       updatedUser: expect.any(Object)
     });
   });
@@ -546,7 +546,7 @@ describe('updateProfileController unit tests', () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: 'Error WHile Update profile',
+      message: 'Error While Updating profile',
       error: expect.any(Error)
     });
   });
@@ -610,7 +610,7 @@ describe('getOrdersController unit tests', () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: 'Error WHile Geting Orders',
+      message: 'Error While Getting Orders',
       error: mockError
     });
   });
@@ -730,7 +730,7 @@ describe('getAllOrdersController unit tests', () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: 'Error While Geting Orders',
+      message: 'Error While Getting Orders',
       error: expect.any(Error)
     });
   });
@@ -802,7 +802,7 @@ describe('orderStatusController unit tests', () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: 'Error While Updateing Order',
+      message: 'Error While Updating Order',
       error: expect.any(Error)
     });
     expect(consoleLogSpy).toHaveBeenCalledWith(mockError);
@@ -819,7 +819,7 @@ describe('orderStatusController unit tests', () => {
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: 'Error While Updateing Order',
+      message: 'Error While Updating Order',
       error: expect.any(Error)
     });
   });
