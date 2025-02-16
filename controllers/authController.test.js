@@ -1,5 +1,5 @@
 import { jest } from "@jest/globals";
-import { registerController, loginController, forgotPasswordController, updateProfileController, getOrdersController, getAllOrdersController } from "./authController";
+import { registerController, loginController, forgotPasswordController, updateProfileController, getOrdersController, getAllOrdersController, orderStatusController } from "./authController";
 import { hashPassword } from '../helpers/authHelper';
 import { comparePassword } from '../helpers/authHelper';
 
@@ -731,6 +731,95 @@ describe('getAllOrdersController unit tests', () => {
     expect(res.send).toHaveBeenCalledWith({
       success: false,
       message: 'Error While Geting Orders',
+      error: expect.any(Error)
+    });
+  });
+});
+
+describe('orderStatusController unit tests', () => {
+  let req;
+  let res;
+  let consoleLogSpy;
+  
+  beforeEach(() => {
+    req = {
+      params: { orderId: '123' },
+      body: { status: 'Processing' }
+    };
+    res = {
+      json: jest.fn(),
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn()
+    };
+    consoleLogSpy = jest.spyOn(console, 'log');
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    consoleLogSpy.mockRestore();
+  });
+
+  it('should successfully update order status', async () => {
+    const mockUpdatedOrder = {
+      _id: '123',
+      status: 'Processing',
+      products: [
+        { name: 'Product 1', price: 100 }
+      ]
+    };
+
+    orderModel.findByIdAndUpdate.mockResolvedValue(mockUpdatedOrder);
+
+    await orderStatusController(req, res);
+
+    expect(orderModel.findByIdAndUpdate).toHaveBeenCalledWith(
+      '123',
+      { status: 'Processing' },
+      { new: true }
+    );
+    expect(res.json).toHaveBeenCalledWith(mockUpdatedOrder);
+  });
+
+  it('should handle non-existent order', async () => {
+    orderModel.findByIdAndUpdate.mockResolvedValue(null);
+
+    await orderStatusController(req, res);
+
+    expect(orderModel.findByIdAndUpdate).toHaveBeenCalledWith(
+      '123',
+      { status: 'Processing' },
+      { new: true }
+    );
+    expect(res.json).toHaveBeenCalledWith(null);
+  });
+
+  it('should handle database errors', async () => {
+    const mockError = new Error('Database error');
+    orderModel.findByIdAndUpdate.mockRejectedValue(mockError);
+
+    await orderStatusController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: 'Error While Updateing Order',
+      error: expect.any(Error)
+    });
+    expect(consoleLogSpy).toHaveBeenCalledWith(mockError);
+  });
+
+  it('should handle missing orderId parameter', async () => {
+    req.params = {};
+    const mockError = new Error('Cannot read properties of undefined');
+    
+    orderModel.findByIdAndUpdate.mockRejectedValue(mockError);
+
+    await orderStatusController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: 'Error While Updateing Order',
       error: expect.any(Error)
     });
   });
