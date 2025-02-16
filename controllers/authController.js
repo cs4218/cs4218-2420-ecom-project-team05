@@ -1,5 +1,6 @@
 import userModel from "../models/userModel.js";
 import orderModel from "../models/orderModel.js";
+import validator from "validator";
 
 import { comparePassword, hashPassword } from "./../helpers/authHelper.js";
 import JWT from "jsonwebtoken";
@@ -14,14 +15,16 @@ export const registerController = async (req, res) => {
     if (!email) {
       return res.send({ message: "Email is Required" });
     }
+    console.log(email);
     if (!validator.isEmail(email)) {
+      console.log("not valid email");
       return res.status(400).send("Invalid email format");
     }
     if (!password) {
       return res.send({ message: "Password is Required" });
     }
     if (!phone) {
-      return res.send({ message: "Phone no is Required" });
+      return res.send({ message: "Phone number is Required" });
     }
     if (!address) {
       return res.send({ message: "Address is Required" });
@@ -59,7 +62,7 @@ export const registerController = async (req, res) => {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Errro in Registeration",
+      message: "Error in Registration",
       error,
     });
   }
@@ -124,7 +127,7 @@ export const forgotPasswordController = async (req, res) => {
   try {
     const { email, answer, newPassword } = req.body;
     if (!email) {
-      res.status(400).send({ message: "Emai is required" });
+      res.status(400).send({ message: "Email is required" });
     }
     if (!answer) {
       res.status(400).send({ message: "answer is required" });
