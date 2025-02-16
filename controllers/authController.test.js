@@ -1,13 +1,15 @@
 import { jest } from "@jest/globals";
-import { registerController, loginController, forgotPasswordController, updateProfileController } from "./authController";
+import { registerController, loginController, forgotPasswordController, updateProfileController, getOrdersController } from "./authController";
 import { hashPassword } from '../helpers/authHelper';
 import { comparePassword } from '../helpers/authHelper';
 
 import userModel from "../models/userModel";
+import orderModel from '../models/orderModel';
 import validator from 'validator';
 import JWT from 'jsonwebtoken';
 
 jest.mock("../models/userModel.js");
+jest.mock('../models/orderModel');
 jest.mock('../helpers/authHelper');
 jest.mock('jsonwebtoken');
 jest.mock('validator', () => ({
@@ -549,3 +551,88 @@ describe('updateProfileController unit tests', () => {
     });
   });
 });
+
+describe('getOrdersController', () => {
+  let req;
+  let res;
+  
+  beforeEach(() => {
+    req = {
+      user: { _id: '123' }
+    };
+    res = {
+      json: jest.fn(),
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn()
+    };
+    jest.clearAllMocks();
+  });
+
+  it('should successfully retrieve user orders', async () => {
+    const mockOrders = [
+      {
+        _id: '1',
+        products: [
+          { name: 'Product 1', price: 100 },
+          { name: 'Product 2', price: 200 }
+        ],
+        buyer: {
+          name: 'John Doe'
+        }
+      }
+    ];
+
+    // Mock the chain of mongoose methods
+    orderModel.find.mockReturnValue({
+      populate: jest.fn().mockReturnValue({
+        populate: jest.fn().mockResolvedValue(mockOrders)
+      })
+    });
+
+    await getOrdersController(req, res);
+
+    expect(orderModel.find).toHaveBeenCalledWith({ buyer: '123' });
+    expect(res.json).toHaveBeenCalledWith(mockOrders);
+  });
+
+  it('should handle errors when retrieving orders', async () => {
+    const mockError = new Error('Database error');
+    
+    // Mock the chain of mongoose methods with error
+    orderModel.find.mockReturnValue({
+      populate: jest.fn().mockReturnValue({
+        populate: jest.fn().mockRejectedValue(mockError)
+      })
+    });
+
+    await getOrdersController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: 'Error WHile Geting Orders',
+      error: mockError
+    });
+  });
+
+  it('should populate correct fields excluding photo', async () => {
+    // Create mock functions for chained populate calls
+    const secondPopulateMock = jest.fn().mockResolvedValue([]);
+    const firstPopulateMock = jest.fn().mockReturnValue({
+      populate: secondPopulateMock
+    });
+    
+    // Setup the initial find chain
+    orderModel.find.mockReturnValue({
+      populate: firstPopulateMock
+    });
+
+    await getOrdersController(req, res);
+
+    // Verify the chain of populate calls
+    expect(firstPopulateMock).toHaveBeenCalledWith('products', '-photo');
+    expect(secondPopulateMock).toHaveBeenCalledWith('buyer', 'name');
+  });
+});
+
+
