@@ -1,3 +1,4 @@
+/* eslint-disable testing-library/prefer-screen-queries */
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import axios from 'axios';
@@ -21,6 +22,8 @@ jest.mock('../../context/auth', () => ({
 jest.mock('../../context/search', () => ({
     useSearch: jest.fn(() => [{ keyword: '' }, jest.fn()]) // Mock useSearch hook to return null state and a mock function
   }));  
+
+  jest.mock("../../hooks/useCategory", () => jest.fn(() => []));
 
   Object.defineProperty(window, 'localStorage', {
     value: {
