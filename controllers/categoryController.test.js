@@ -262,3 +262,90 @@ describe('categoryControlller', () => {
     expect(consoleLogSpy).toHaveBeenCalledWith(mockError);
   });
 });
+
+describe('singleCategoryController', () => {
+  let req;
+  let res;
+  let consoleLogSpy;
+  
+  beforeEach(() => {
+    req = {
+      params: { slug: 'test-category' }
+    };
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn()
+    };
+    consoleLogSpy = jest.spyOn(console, 'log');
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    consoleLogSpy.mockRestore();
+  });
+
+  it('should successfully retrieve a single category', async () => {
+    const mockCategory = {
+      _id: '1',
+      name: 'Test Category',
+      slug: 'test-category'
+    };
+
+    categoryModel.findOne.mockResolvedValue(mockCategory);
+
+    await singleCategoryController(req, res);
+
+    expect(categoryModel.findOne).toHaveBeenCalledWith({ slug: 'test-category' });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      message: 'Get Single Category Successfully',
+      category: mockCategory
+    });
+  });
+
+  it('should handle non-existent category', async () => {
+    categoryModel.findOne.mockResolvedValue(null);
+
+    await singleCategoryController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      message: 'Get Single Category Successfully',
+      category: null
+    });
+  });
+
+  it('should handle database errors', async () => {
+    const mockError = new Error('Database error');
+    categoryModel.findOne.mockRejectedValue(mockError);
+
+    await singleCategoryController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      error: mockError,
+      message: 'Error While getting Single Category'
+    });
+    expect(consoleLogSpy).toHaveBeenCalledWith(mockError);
+  });
+
+  it('should handle missing slug parameter', async () => {
+    req.params = {};
+    const mockError = new Error('Invalid slug');
+    
+    categoryModel.findOne.mockRejectedValue(mockError);
+
+    await singleCategoryController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      error: mockError,
+      message: 'Error While getting Single Category'
+    });
+    expect(consoleLogSpy).toHaveBeenCalledWith(mockError);
+  });
+});
