@@ -1,4 +1,4 @@
-import { createCategoryController, updateCategoryController, categoryControlller, singleCategoryController, deleteCategoryCOntroller } from './categoryController';
+import { createCategoryController, updateCategoryController, categoryController, singleCategoryController, deleteCategoryController } from './categoryController';
 import categoryModel from '../models/categoryModel';
 import slugify from 'slugify';
 
@@ -196,7 +196,7 @@ describe('updateCategoryController', () => {
   });
 });
 
-describe('categoryControlller', () => {
+describe('categoryController', () => {
   let req;
   let res;
   let consoleLogSpy;
@@ -223,7 +223,7 @@ describe('categoryControlller', () => {
 
     categoryModel.find.mockResolvedValue(mockCategories);
 
-    await categoryControlller(req, res);
+    await categoryController(req, res);
 
     expect(categoryModel.find).toHaveBeenCalledWith({});
     expect(res.status).toHaveBeenCalledWith(200);
@@ -237,7 +237,7 @@ describe('categoryControlller', () => {
   it('should handle empty categories list', async () => {
     categoryModel.find.mockResolvedValue([]);
 
-    await categoryControlller(req, res);
+    await categoryController(req, res);
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith({
@@ -251,7 +251,7 @@ describe('categoryControlller', () => {
     const mockError = new Error('Database error');
     categoryModel.find.mockRejectedValue(mockError);
 
-    await categoryControlller(req, res);
+    await categoryController(req, res);
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.send).toHaveBeenCalledWith({
@@ -345,6 +345,85 @@ describe('singleCategoryController', () => {
       success: false,
       error: mockError,
       message: 'Error While getting Single Category'
+    });
+    expect(consoleLogSpy).toHaveBeenCalledWith(mockError);
+  });
+});
+
+describe('deleteCategoryController', () => {
+  let req;
+  let res;
+  let consoleLogSpy;
+  
+  beforeEach(() => {
+    req = {
+      params: { id: '123' }
+    };
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn()
+    };
+    consoleLogSpy = jest.spyOn(console, 'log');
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    consoleLogSpy.mockRestore();
+  });
+
+  it('should successfully delete a category', async () => {
+    categoryModel.findByIdAndDelete.mockResolvedValue({});
+
+    await deleteCategoryController(req, res);
+
+    expect(categoryModel.findByIdAndDelete).toHaveBeenCalledWith('123');
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      message: 'Category Deleted Successfully'
+    });
+  });
+
+  it('should handle non-existent category deletion', async () => {
+    categoryModel.findByIdAndDelete.mockResolvedValue(null);
+
+    await deleteCategoryController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      message: 'Category Deleted Successfully'
+    });
+  });
+
+  it('should handle database errors', async () => {
+    const mockError = new Error('Database error');
+    categoryModel.findByIdAndDelete.mockRejectedValue(mockError);
+
+    await deleteCategoryController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: 'error while deleting category',
+      error: mockError
+    });
+    expect(consoleLogSpy).toHaveBeenCalledWith(mockError);
+  });
+
+  it('should handle missing id parameter', async () => {
+    req.params = {};
+    const mockError = new Error('Invalid ID');
+    
+    categoryModel.findByIdAndDelete.mockRejectedValue(mockError);
+
+    await deleteCategoryController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      message: 'error while deleting category',
+      error: mockError
     });
     expect(consoleLogSpy).toHaveBeenCalledWith(mockError);
   });
