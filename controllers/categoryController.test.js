@@ -1,4 +1,4 @@
-import { createCategoryController, updateCategoryController } from './categoryController';
+import { createCategoryController, updateCategoryController, categoryControlller, singleCategoryController, deleteCategoryCOntroller } from './categoryController';
 import categoryModel from '../models/categoryModel';
 import slugify from 'slugify';
 
@@ -191,6 +191,73 @@ describe('updateCategoryController', () => {
       success: false,
       error: mockError,
       message: 'Error while updating category'
+    });
+    expect(consoleLogSpy).toHaveBeenCalledWith(mockError);
+  });
+});
+
+describe('categoryControlller', () => {
+  let req;
+  let res;
+  let consoleLogSpy;
+  
+  beforeEach(() => {
+    req = {};
+    res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn()
+    };
+    consoleLogSpy = jest.spyOn(console, 'log');
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    consoleLogSpy.mockRestore();
+  });
+
+  it('should successfully retrieve all categories', async () => {
+    const mockCategories = [
+      { _id: '1', name: 'Category 1', slug: 'category-1' },
+      { _id: '2', name: 'Category 2', slug: 'category-2' }
+    ];
+
+    categoryModel.find.mockResolvedValue(mockCategories);
+
+    await categoryControlller(req, res);
+
+    expect(categoryModel.find).toHaveBeenCalledWith({});
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      message: 'All Categories List',
+      category: mockCategories
+    });
+  });
+
+  it('should handle empty categories list', async () => {
+    categoryModel.find.mockResolvedValue([]);
+
+    await categoryControlller(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      message: 'All Categories List',
+      category: []
+    });
+  });
+
+  it('should handle database errors', async () => {
+    const mockError = new Error('Database error');
+    categoryModel.find.mockRejectedValue(mockError);
+
+    await categoryControlller(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({
+      success: false,
+      error: mockError,
+      message: 'Error while getting all categories'
     });
     expect(consoleLogSpy).toHaveBeenCalledWith(mockError);
   });
