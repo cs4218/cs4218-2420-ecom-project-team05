@@ -152,10 +152,8 @@ describe("Header Component", () => {
       </BrowserRouter>
     );
 
-    // Open dropdown
     fireEvent.click(screen.getByText("Test User"));
 
-    // Click logout
     fireEvent.click(screen.getByRole("link", { name: "Logout" }));
 
     // Check if setAuth is called with correct arguments
@@ -165,20 +163,17 @@ describe("Header Component", () => {
       token: "",
     });
 
-    // Check if localStorage.removeItem is called
     expect(localStorage.removeItem).toHaveBeenCalledWith("auth");
 
-    // Check if toast.success is called
     const toast = require("react-hot-toast");
     expect(toast.success).toHaveBeenCalledWith("Logout Successfully");
   });
 
   it("displays the correct cart count badge", () => {
-    // Empty cart
     renderHeader(null, []);
     expect(screen.getByText("0")).toBeInTheDocument();
 
-    // Cart with items
+    // Simulate cart with items
     renderHeader(null, [{ id: 1 }, { id: 2 }, { id: 3 }]);
     expect(screen.getByText("3")).toBeInTheDocument();
   });
@@ -189,12 +184,10 @@ describe("Header Component", () => {
     // Open categories dropdown
     fireEvent.click(screen.getByText("Categories"));
 
-    // Check if all categories are rendered
     expect(screen.getByText("All Categories")).toBeInTheDocument();
     expect(screen.getByText("Electronics")).toBeInTheDocument();
     expect(screen.getByText("Books")).toBeInTheDocument();
 
-    // Check if category links are correct using getByRole instead of closest
     const electronicsLink = screen.getByRole("link", { name: "Electronics" });
     expect(electronicsLink).toHaveAttribute("href", "/category/electronics");
 
