@@ -116,7 +116,7 @@ describe("Cart Component", () => {
       await waitFor(() => {
         expect(screen.queryByText("Make Payment")).not.toBeInTheDocument();
       });
-      expect(screen.getByText("Plase Login to checkout")).toBeInTheDocument();
+      expect(screen.getByText("Please login to checkout")).toBeInTheDocument();
 
       expect(screen.queryByText("Remove")).not.toBeInTheDocument();
     });
@@ -130,7 +130,7 @@ describe("Cart Component", () => {
       expect(screen.getByText("Hello Guest")).toBeInTheDocument();
       expect(
         screen.getByText(
-          "You Have 2 items in your cart please login to checkout !"
+          "You have 2 items in your cart, please login to checkout!"
         )
       ).toBeInTheDocument();
 
@@ -141,7 +141,7 @@ describe("Cart Component", () => {
         expect(screen.queryByText("Make Payment")).not.toBeInTheDocument();
       });
       expect(screen.getByText("Total : $30.00")).toBeInTheDocument();
-      expect(screen.getByText("Plase Login to checkout")).toBeInTheDocument();
+      expect(screen.getByText("Please login to checkout")).toBeInTheDocument();
 
       expect(screen.getByText("product one")).toBeInTheDocument();
       expect(screen.getByText("product one description")).toBeInTheDocument();
@@ -157,7 +157,7 @@ describe("Cart Component", () => {
       useNavigate.mockReturnValue(mockNavigate);
       renderPage();
 
-      fireEvent.click(screen.getByText("Plase Login to checkout"));
+      fireEvent.click(screen.getByText("Please login to checkout"));
 
       await waitFor(() =>
         expect(mockNavigate).toHaveBeenCalledWith("/login", { state: "/cart" })
@@ -181,7 +181,7 @@ describe("Cart Component", () => {
       expect(screen.getByText("Your Cart Is Empty")).toBeInTheDocument();
 
       expect(
-        screen.queryByText("Plase Login to checkout")
+        screen.queryByText("Please login to checkout")
       ).not.toBeInTheDocument();
 
       expect(screen.queryByText("Remove")).not.toBeInTheDocument();
@@ -195,12 +195,12 @@ describe("Cart Component", () => {
 
       expect(screen.getByText("Hello John Doe")).toBeInTheDocument();
       expect(
-        screen.getByText("You Have 2 items in your cart")
+        screen.getByText("You have 2 items in your cart")
       ).toBeInTheDocument();
 
       expect(screen.getByText("Total : $30.00")).toBeInTheDocument();
       expect(
-        screen.queryByText("Plase Login to checkout")
+        screen.queryByText("Please Login to checkout")
       ).not.toBeInTheDocument();
 
       expect(screen.getByText("product one")).toBeInTheDocument();
@@ -361,7 +361,7 @@ describe("Cart Component", () => {
       expect(useCart).toBeCalled();
 
       expect(
-        screen.getByText("You Have 2 items in your cart")
+        screen.getByText("You have 2 items in your cart")
       ).toBeInTheDocument();
 
       fireEvent.click(screen.getAllByText("Remove")[0]);
