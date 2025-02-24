@@ -22,7 +22,7 @@ export default {
   // only run these tests
   testMatch: [
     // "<rootDir>/client/src/pages/Auth/*.test.js",
-    "<rootDir>/client/src/components/*.test.js"
+    "<rootDir>/client/src/**/*.test.js"
   ],
   // jest code coverage
   collectCoverage: true,
