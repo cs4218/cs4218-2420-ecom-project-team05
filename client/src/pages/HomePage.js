@@ -81,8 +81,11 @@ const HomePage = () => {
     let all = [...checked];
     if (value) {
       all.push(id);
+      console.log("here")
+
     } else {
       all = all.filter((c) => c !== id);
+      console.log("there")
     }
     setChecked(all);
   };
