@@ -11,7 +11,7 @@ jest.mock("../components/Footer", () => () => (
   <footer data-testid="footer">Mock Footer</footer>
 ));
 
-test("renders Layout with default props", () => {
+it("renders Layout with default props", () => {
   render(
     <Layout>
       <div data-testid="children">Test Content</div>
@@ -23,7 +23,7 @@ test("renders Layout with default props", () => {
   expect(screen.getByTestId("children")).toBeInTheDocument();
 });
 
-test("renders Layout with custom title", async () => {
+it("renders Layout with custom title", async () => {
   render(
     <Layout title="Custom Title">
       <div data-testid="children">Test Content</div>
@@ -35,7 +35,7 @@ test("renders Layout with custom title", async () => {
   });
 });
 
-test("renders meta tags correctly", async () => {
+it("renders meta tags correctly", async () => {
   render(
     <Layout
       description="Test Description"
