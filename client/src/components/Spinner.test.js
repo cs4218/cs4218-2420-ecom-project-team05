@@ -24,7 +24,7 @@ describe("Spinner Component", () => {
       .mockReturnValue(navigate);
   });
 
-  test("renders Spinner and displays countdown", () => {
+  it("renders Spinner and displays countdown", () => {
     render(
       <MemoryRouter>
         <Spinner path="login" />
@@ -35,7 +35,7 @@ describe("Spinner Component", () => {
     ).toBeInTheDocument();
   });
 
-  test("redirects after countdown reaches 0", async () => {
+  it("redirects after countdown reaches 0", async () => {
     jest.useFakeTimers();
     render(
       <MemoryRouter>
@@ -51,7 +51,7 @@ describe("Spinner Component", () => {
     jest.useRealTimers();
   });
 
-  test("updates countdown state correctly", async () => {
+  it("updates countdown state correctly", async () => {
     jest.useFakeTimers();
     render(
       <MemoryRouter>
