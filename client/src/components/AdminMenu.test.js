@@ -5,7 +5,7 @@ import AdminMenu from "./AdminMenu";
 import "@testing-library/jest-dom";
 
 describe("AdminMenu component", () => {
-  test("renders the Admin Panel title", () => {
+  it("renders the Admin Panel title", () => {
     render(
       <Router>
         <AdminMenu />
@@ -16,7 +16,7 @@ describe("AdminMenu component", () => {
     expect(title).toBeInTheDocument();
   });
 
-  test("renders the menu links", () => {
+  it("renders the menu links", () => {
     render(
       <Router>
         <AdminMenu />
@@ -34,7 +34,7 @@ describe("AdminMenu component", () => {
     expect(ordersLink).toBeInTheDocument();
   });
 
-  test("links have correct hrefs", () => {
+  it("links have correct hrefs", () => {
     render(
       <Router>
         <AdminMenu />
@@ -58,7 +58,7 @@ describe("AdminMenu component", () => {
     expect(ordersLink).toHaveAttribute("href", "/dashboard/admin/orders");
   });
 
-  test("does not render the Users link", () => {
+  it("does not render the Users link", () => {
     render(
       <Router>
         <AdminMenu />
