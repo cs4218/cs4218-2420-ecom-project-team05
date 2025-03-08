@@ -26,6 +26,31 @@ jest.mock("../../components/Layout", () => ({ children, title }) => (
   </div>
 ));
 
+// Mock problematic DOM methods
+const originalElementQuerySelector = Element.prototype.querySelector;
+Element.prototype.querySelector = function(selector) {
+  try {
+    return originalElementQuerySelector.call(this, selector);
+  } catch (e) {
+    if (e.message.includes('is not a valid selector')) {
+      return null;
+    }
+    throw e;
+  }
+};
+
+const originalElementQuerySelectorAll = Element.prototype.querySelectorAll;
+Element.prototype.querySelectorAll = function(selector) {
+  try {
+    return originalElementQuerySelectorAll.call(this, selector);
+  } catch (e) {
+    if (e.message.includes('is not a valid selector')) {
+      return [];
+    }
+    throw e;
+  }
+};
+
 describe("UpdateProduct Component", () => {
     const mockCategories = [
       { _id: "1", name: "Electronics" },
@@ -124,7 +149,7 @@ describe("UpdateProduct Component", () => {
         );
     
         await waitFor(() => {
-          expect(toast.error).toHaveBeenCalledWith("Something went wrong in getting catgeory");
+          expect(toast.error).toHaveBeenCalledWith("Something went wrong in getting category");
         });
       });
     

@@ -6,6 +6,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import '@testing-library/jest-dom/extend-expect';
 import toast from 'react-hot-toast';
 import Register from './Register';
+import timezoneMock from 'timezone-mock';
 
 // Mocking axios.post
 jest.mock('axios');
@@ -423,9 +424,14 @@ describe('DOB Field Validation', () => {
     fireEvent.blur(getByPlaceholderText('Enter Your DOB'));
     await findByText(/date of birth cannot be in the future/i);
 
-  // Test current date
-    const today = new Date().toISOString().split("T")[0]; // Get YYYY-MM-DD format 
-    fillForm(getByPlaceholderText, { dob: today });
+    // Test current date
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayFormatted = `${year}-${month}-${day}`;
+
+    fillForm(getByPlaceholderText, { dob: todayFormatted });
     fireEvent.blur(getByPlaceholderText("Enter Your DOB"));
     await findByText(/date of birth cannot be today/i)
   })

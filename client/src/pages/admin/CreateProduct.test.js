@@ -21,6 +21,38 @@ jest.mock("../../components/Layout", () => ({ children, title }) => (
   </div>
 ));
 
+// Mock dependencies
+jest.mock("axios");
+jest.mock("react-hot-toast", () => ({
+    error: jest.fn(),
+    success: jest.fn(),
+  }));
+  const mockNavigate = jest.fn();
+  jest.mock("react-router-dom", () => ({
+    ...jest.requireActual("react-router-dom"),
+    useNavigate: () => mockNavigate,
+    useParams: () => ({ slug: "test-product" }),
+  }));
+jest.mock("../../components/AdminMenu", () => () => <div data-testid="admin-menu">Admin Menu</div>);
+jest.mock("../../components/Layout", () => ({ children, title }) => (
+  <div data-testid="layout" data-title={title}>
+    {children}
+  </div>
+));
+
+// Mock problematic DOM methods
+const originalElementQuerySelector = Element.prototype.querySelector;
+Element.prototype.querySelector = function(selector) {
+  try {
+    return originalElementQuerySelector.call(this, selector);
+  } catch (e) {
+    if (e.message.includes('is not a valid selector')) {
+      return null;
+    }
+    throw e;
+  }
+};
+
 describe("CreateProduct Component", () => {
     const mockCategories = [
       { _id: "1", name: "Electronics" },

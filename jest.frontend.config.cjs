@@ -13,7 +13,7 @@ module.exports = {
 
   // tells jest how to handle css/scss imports in your tests
   moduleNameMapper: {
-    "\\.(css|scss)$": "identity-obj-proxy",
+    "\\.(css|scss|less|sass)$": "identity-obj-proxy",
   },
 
   // ignore all node_modules except styleMock (needed for css imports)
