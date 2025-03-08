@@ -12,7 +12,7 @@
     "sonarqube": "sonarqube-scanner",
     "test": "concurrently \"npm run test:frontend\" \"npm run test:backend\"",
     "test:frontend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.frontend.config.cjs",
-    "test:backend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.config.cjs"
+    "test:backend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.config.js"
   },
   "keywords": [],
   "author": "RP",
