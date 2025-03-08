@@ -121,6 +121,28 @@ export const loginController = async (req, res) => {
   }
 };
 
+//get all users
+export const getAllUsersController = async (req, res) => {
+  try {
+    const users = await userModel.find({})
+      .select("-password")
+      .sort({ createdAt: -1 });
+    
+    res.status(200).send({
+      success: true,
+      message: "All Users List",
+      users,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: "Error While Getting Users",
+      error,
+    });
+  }
+};
+
 //forgotPasswordController
 
 export const forgotPasswordController = async (req, res) => {

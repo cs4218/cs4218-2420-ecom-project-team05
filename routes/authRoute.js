@@ -4,6 +4,7 @@ import {
   loginController,
   testController,
   forgotPasswordController,
+  getAllUsersController,
   updateProfileController,
   getOrdersController,
   getAllOrdersController,
@@ -23,6 +24,9 @@ router.post("/login", loginController);
 
 //Forgot Password || POST
 router.post("/forgot-password", forgotPasswordController);
+
+//Get all users
+router.get("/all-users", requireSignIn, isAdmin, getAllUsersController);
 
 //test routes
 router.get("/test", requireSignIn, isAdmin, testController);
