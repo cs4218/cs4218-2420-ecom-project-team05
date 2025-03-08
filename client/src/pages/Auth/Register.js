@@ -89,8 +89,8 @@ const Register = () => {
     dobDate.setHours(0, 0, 0, 0);
     currentDate.setHours(0, 0, 0, 0);
   
-    if (dobDate > currentDate) return "Date of birth cannot be in the future.";
-    if (dobDate.getTime() === currentDate.getTime()) return "Date of birth cannot be today.";
+    if (dobDate > currentDate) return "Date of birth cannot be in the future";
+    if (dobDate.getTime() === currentDate.getTime()) return "Date of birth cannot be today";
   
     return "";
   };
