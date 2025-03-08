@@ -21,13 +21,12 @@ module.exports = {
 
   // only run these tests
   testMatch: [
-    "<rootDir>/client/src/pages/Auth/*.test.js",
-    "<rootDir>/client/src/pages/admin/*.test.js"
+    // "<rootDir>/client/src/pages/Auth/*.test.js",
+    "<rootDir>/client/src/**/*.test.js"
   ],
-
   // jest code coverage
   collectCoverage: true,
-  collectCoverageFrom: ["client/src/pages/Auth/**", "client/src/pages/admin/**"],
+  collectCoverageFrom: ["client/src/**/**/**"],
   coverageThreshold: {
     global: {
       lines: 0,
