@@ -22,6 +22,7 @@ export const createProductController = async (req, res) => {
     const { name, description, price, category, quantity, shipping } =
       req.fields;
     const { photo } = req.files;
+
     //alidation
     switch (true) {
       case !name:
@@ -92,16 +93,21 @@ export const getSingleProductController = async (req, res) => {
       .findOne({ slug: req.params.slug })
       .select("-photo")
       .populate("category");
-    res.status(200).send({
-      success: true,
-      message: "Single Product Fetched",
-      product,
-    });
+
+    if (product) {
+      res.status(200).send({
+        success: true,
+        message: "Single Product Fetched",
+        product,
+      });
+    } else {
+      throw new Error("Error while getting single product");
+    }
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Eror while getitng single product",
+      message: error.message,
       error,
     });
   }
@@ -114,6 +120,8 @@ export const productPhotoController = async (req, res) => {
     if (product.photo.data) {
       res.set("Content-type", product.photo.contentType);
       return res.status(200).send(product.photo.data);
+    } else {
+      throw new Error("Erorr while getting photo");
     }
   } catch (error) {
     console.log(error);
@@ -128,11 +136,18 @@ export const productPhotoController = async (req, res) => {
 //delete controller
 export const deleteProductController = async (req, res) => {
   try {
-    await productModel.findByIdAndDelete(req.params.pid).select("-photo");
-    res.status(200).send({
-      success: true,
-      message: "Product Deleted successfully",
-    });
+    const deletedProduct = await productModel
+      .findByIdAndDelete(req.params.pid)
+      .select("-photo");
+
+    if (deletedProduct) {
+      res.status(200).send({
+        success: true,
+        message: "Product Deleted successfully",
+      });
+    } else {
+      throw new Error("Error while deleting product");
+    }
   } catch (error) {
     console.log(error);
     res.status(500).send({
