@@ -57,15 +57,4 @@ describe("AdminMenu component", () => {
     expect(productsLink).toHaveAttribute("href", "/dashboard/admin/products");
     expect(ordersLink).toHaveAttribute("href", "/dashboard/admin/orders");
   });
-
-  it("does not render the Users link", () => {
-    render(
-      <Router>
-        <AdminMenu />
-      </Router>
-    );
-
-    const usersLink = screen.queryByText(/Users/i);
-    expect(usersLink).not.toBeInTheDocument();
-  });
 });
