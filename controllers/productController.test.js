@@ -9,6 +9,8 @@ import {
   productListController,
   updateProductController,
   deleteProductController,
+  realtedProductController,
+  searchProductController,
 } from "./productController";
 import productModel from "../models/productModel.js";
 import categoryModel from "../models/categoryModel.js";
@@ -47,15 +49,15 @@ jest.mock("braintree", () => ({
 }));
 
 describe("Product Controllers", () => {
-  let category, product;
+  let category, product1, product2, product3;
 
   beforeEach(async () => {
     category = await categoryModel.create({ name: "Test Category" });
 
-    product = await productModel.create({
+    product1 = await productModel.create({
       name: "Test Product",
       slug: "test-product",
-      description: "Test product description",
+      description: "A great product",
       price: 100,
       category: category._id,
       quantity: 10,
@@ -63,6 +65,24 @@ describe("Product Controllers", () => {
         data: Buffer.from("test image data"),
         contentType: "image/png",
       },
+    });
+
+    product2 = await productModel.create({
+      name: "Test Product Two",
+      slug: "test-product-two",
+      description: "Another great product",
+      price: 120,
+      category: category._id,
+      quantity: 5,
+    });
+
+    product3 = await productModel.create({
+      name: "Different Category Product",
+      slug: "different-category-product",
+      description: "A different product",
+      price: 90,
+      category: new mongoose.Types.ObjectId(),
+      quantity: 7,
     });
   });
 
@@ -111,7 +131,7 @@ describe("Product Controllers", () => {
     expect(res.send).toHaveBeenCalledWith(
       expect.objectContaining({
         success: true,
-        counTotal: 1,
+        counTotal: 3,
         products: expect.any(Array),
       })
     );
@@ -156,8 +176,8 @@ describe("Product Controllers", () => {
     );
   });
 
-  test("productPhotoController should return product photo", async () => {
-    const req = { params: { pid: product._id } };
+  it("productPhotoController should return product photo", async () => {
+    const req = { params: { pid: product1._id } };
     const res = {
       set: jest.fn(),
       status: jest.fn().mockReturnThis(),
@@ -171,8 +191,8 @@ describe("Product Controllers", () => {
     expect(res.send).toHaveBeenCalledWith(expect.any(Buffer));
   });
 
-  test("deleteProductController should delete a product", async () => {
-    const req = { params: { pid: product._id } };
+  it("deleteProductController should delete a product", async () => {
+    const req = { params: { pid: product1._id } };
     const res = {
       status: jest.fn().mockReturnThis(),
       send: jest.fn(),
@@ -188,13 +208,13 @@ describe("Product Controllers", () => {
       })
     );
 
-    const deletedProduct = await productModel.findById(product._id);
+    const deletedProduct = await productModel.findById(product1._id);
     expect(deletedProduct).toBeNull();
   });
 
-  test("updateProductController should update a product", async () => {
+  it("updateProductController should update a product", async () => {
     const req = {
-      params: { pid: product._id },
+      params: { pid: product1._id },
       fields: {
         name: "Updated Product",
         description: "Updated description",
@@ -219,12 +239,12 @@ describe("Product Controllers", () => {
       })
     );
 
-    const updatedProduct = await productModel.findById(product._id);
+    const updatedProduct = await productModel.findById(product1._id);
     expect(updatedProduct.name).toBe("Updated Product");
     expect(updatedProduct.price).toBe(150);
   });
 
-  test("productFiltersController should return filtered products", async () => {
+  it("productFiltersController should return filtered products", async () => {
     const req = { body: { checked: [category._id], radio: [50, 200] } };
     const res = {
       status: jest.fn().mockReturnThis(),
@@ -240,6 +260,76 @@ describe("Product Controllers", () => {
         products: expect.any(Array),
       })
     );
+    expect(res.send.mock.calls[0][0].products.length).toBe(2);
+  });
+
+  it("productCountController should return correct product count", async () => {
+    const req = {};
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    await productCountController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({ success: true, total: 3 })
+    );
+  });
+
+  it("productListController should return paginated products", async () => {
+    const req = { params: { page: "1" } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    await productListController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        products: expect.any(Array),
+      })
+    );
+    expect(res.send.mock.calls[0][0].products.length).toBe(3);
+  });
+
+  it("searchProductController should return products matching keyword", async () => {
+    const req = { params: { keyword: "Test Product" } };
+    const res = {
+      json: jest.fn(),
+    };
+
+    await searchProductController(req, res);
+
+    expect(res.json).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "Test Product" }),
+        expect.objectContaining({ name: "Test Product Two" }),
+      ])
+    );
+  });
+
+  it("realtedProductController should return related products", async () => {
+    const req = { params: { pid: product1._id, cid: category._id } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    await realtedProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        products: expect.any(Array),
+      })
+    );
     expect(res.send.mock.calls[0][0].products.length).toBe(1);
+    expect(res.send.mock.calls[0][0].products[0]._id).not.toBe(product1._id);
   });
 });
