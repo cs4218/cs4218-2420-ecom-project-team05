@@ -214,6 +214,19 @@ describe("Product Controllers", () => {
   });
 
   it("should create a product successfully", async () => {
+    // Mock the entire productModel
+    const mockSave = jest.fn().mockResolvedValue(true);
+    const mockProductInstance = {
+      photo: {
+        data: null,
+        contentType: null,
+      },
+      save: mockSave,
+    };
+
+    // Mock productModel as a constructor function
+    productModel.mockImplementation(() => mockProductInstance);
+
     const newProduct = {
       name: "New Product",
       description: "New product description",
@@ -224,7 +237,13 @@ describe("Product Controllers", () => {
 
     const req = {
       fields: newProduct,
-      files: {},
+      files: {
+        photo: {
+          type: "image/jpeg",
+          path: "",
+          size: 1,
+        },
+      },
     };
 
     const res = {
@@ -234,6 +253,13 @@ describe("Product Controllers", () => {
 
     await createProductController(req, res);
 
+    expect(productModel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: newProduct.name,
+        slug: expect.any(String),
+      })
+    );
+    expect(mockProductInstance.photo.contentType).toBe("image/jpeg");
     expect(res.status).toHaveBeenCalledWith(201);
   });
 
@@ -581,7 +607,11 @@ describe("Product Controllers", () => {
         category: mockCategory._id,
         quantity: 20,
       },
-      files: {},
+      files: {
+        photo: {
+          size: 1,
+        },
+      },
     };
 
     const res = {
@@ -602,7 +632,6 @@ describe("Product Controllers", () => {
     const req = {
       params: { pid: mockProduct1._id },
       fields: {
-        name: "Updated Product",
         description: "Updated description",
         price: 150,
         category: mockCategory._id,
@@ -732,6 +761,33 @@ describe("Product Controllers", () => {
     expect(res.status).toHaveBeenCalledWith(500);
   });
 
+  it("(photo size > 1mb) updateProductController should not update a product", async () => {
+    const req = {
+      params: { pid: mockProduct1._id },
+      fields: {
+        name: "Updated Product",
+        description: "Updated description",
+        price: 150,
+        category: mockCategory._id,
+        quantity: 10,
+      },
+      files: {
+        photo: {
+          size: 100000000,
+        },
+      },
+    };
+
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    await updateProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
   it("productFiltersController should return filtered products", async () => {
     const req = { body: { checked: [mockCategory._id], radio: [50, 200] } };
     const res = {
@@ -747,6 +803,24 @@ describe("Product Controllers", () => {
       expect.objectContaining({
         success: true,
         products: expect.any(Array),
+      })
+    );
+  });
+
+  it("productFiltersController should fail to return filtered products, price negative", async () => {
+    const req = { body: { checked: [mockCategory._id], radio: [-1, -10] } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    await productFiltersController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: "Error WHile Filtering Products",
       })
     );
   });
@@ -859,7 +933,7 @@ describe("Product Controllers", () => {
     );
   });
 
-  test("braintreeTokenController should return a token", async () => {
+  it("braintreeTokenController should return a token", async () => {
     const req = {};
     const res = {
       send: jest.fn(),
