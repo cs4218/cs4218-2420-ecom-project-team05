@@ -25,8 +25,8 @@ const Users = () => {
       }
       setLoading(false);
     } catch (error) {
-      console.log("Error details:", error);
-      console.log("Error response:", error.response?.data);
+      // console.log("Error details:", error);
+      // console.log("Error response:", error.response?.data);
       toast.error(`Error fetching users: ${error.response?.data?.message || error.message}`);
       setLoading(false);
     }

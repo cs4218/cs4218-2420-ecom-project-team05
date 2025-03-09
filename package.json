@@ -1,7 +1,6 @@
 {
   "name": "ecom",
   "version": "1.0.0",
-  "type": "module",
   "description": "ecommerce rest api",
   "main": "server.js",
   "scripts": {
@@ -11,7 +10,7 @@
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "sonarqube": "sonarqube-scanner",
     "test": "concurrently \"npm run test:frontend\" \"npm run test:backend\"",
-    "test:frontend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.frontend.config.cjs",
+    "test:frontend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.frontend.config.js",
     "test:backend": "node --experimental-vm-modules node_modules/jest/bin/jest.js --config jest.backend.config.js"
   },
   "keywords": [],
@@ -40,7 +39,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.24.5",
-    "@babel/preset-env": "^7.24.5",
+    "@babel/plugin-transform-modules-commonjs": "^7.26.3",
+    "@babel/preset-env": "^7.26.9",
     "@babel/preset-react": "^7.24.1",
     "@playwright/test": "^1.44.0",
     "@types/node": "^20.12.12",

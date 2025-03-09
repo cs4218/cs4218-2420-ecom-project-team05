@@ -100,8 +100,9 @@ const CreateProduct = () => {
       toast.error("Please upload an image file");
       return;
     }
+  
+      setPhoto(file);
     
-    setPhoto(file);
   }
 
   //create product function
@@ -167,7 +168,7 @@ const CreateProduct = () => {
             <h1>Create Product</h1>
             <div className="m-1 w-75">
               <Select
-                bordered={false}
+                variant={false}
                 placeholder="Select a category"
                 size="large"
                 showSearch
@@ -266,7 +267,7 @@ const CreateProduct = () => {
               </div>
               <div className="mb-3">
                 <Select
-                  bordered={false}
+                  variant={false}
                   placeholder="Select shipping option"
                   data-testid="shipping-select"
                   size="large"

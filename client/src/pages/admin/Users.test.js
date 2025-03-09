@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import Users from '../../pages/admin/Users';
@@ -49,10 +49,12 @@ describe("Users Component", () => {
         require('../../context/auth').useAuth.mockReturnValue(mockAuth);
       });
 
-    it("renders spinner initially", () => {
+    it("renders spinner initially", async () => {
         axios.get.mockImplementation(() => new Promise((resolve => setTimeout(resolve, 100))))
 
-        render(<Users />)
+        await act(async () => {
+          render(<Users />);
+        });
 
         expect(screen.getByRole('status')).toBeInTheDocument();
         expect(screen.getByText('Loading...')).toBeInTheDocument();
@@ -64,7 +66,9 @@ describe("Users Component", () => {
             users: mockUsers }
         })
 
-        render(<Users />)
+        await act(async () => {
+          render(<Users />);
+        });
 
         await waitFor(() => {
             expect(screen.queryByRole('status')).not.toBeInTheDocument();
@@ -103,7 +107,9 @@ describe("Users Component", () => {
             users: [] }
         })
 
-        render(<Users />)
+        await act(async () => {
+          render(<Users />);
+        });
 
         await waitFor(() => {
             expect(screen.queryByRole('status')).not.toBeInTheDocument();
@@ -122,7 +128,9 @@ describe("Users Component", () => {
             }
         })
 
-        render(<Users />)
+        await act(async () => {
+          render(<Users />);
+        });
 
         await waitFor(() => {
             expect(toast.error).toHaveBeenCalledWith(`Error fetching users: ${errorMessage}`);
@@ -135,7 +143,9 @@ describe("Users Component", () => {
             users: mockUsers }
         })
 
-        render(<Users />)
+        await act(async () => {
+          render(<Users />);
+        });
 
         expect(axios.get).toHaveBeenCalledWith('/api/v1/auth/all-users', {
             headers: {
@@ -159,7 +169,9 @@ describe("Users Component", () => {
             users: [incompleteUser] }
         })
 
-        render(<Users />)
+        await act(async () => {
+          render(<Users />);
+        });
 
         await waitFor(() => {
             expect(screen.queryByRole('status')).not.toBeInTheDocument();

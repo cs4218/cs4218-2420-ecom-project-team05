@@ -150,7 +150,7 @@ describe("CreateProduct Component", () => {
         );
     
         // Click create button without filling any fields
-        fireEvent.click(screen.getByText("CREATE PRODUCT"));
+        await act(async () => fireEvent.click(screen.getByText("CREATE PRODUCT")));
     
         await waitFor(() => {
             expect(toast.error).toHaveBeenCalledWith("Please input your details");
@@ -163,50 +163,64 @@ describe("CreateProduct Component", () => {
       it("successfully creates a product with all fields filled", async () => {
         axios.post.mockResolvedValueOnce({
           data: { success: true, message: "Product created successfully" },
-        })
-
-        render(
-            <BrowserRouter>
-              <CreateProduct />
-            </BrowserRouter>
-          );
+        });
       
-          const nameInput = screen.getByPlaceholderText("Enter a name");
-          const descInput = screen.getByPlaceholderText("Enter a description");
-          const priceInput = screen.getByPlaceholderText("Enter a price");
-          const quantityInput = screen.getByPlaceholderText("Enter a quantity");
-          const fileInput = screen.getByLabelText("Upload Photo", { selector: "input" });
-          
+        render(
+          <BrowserRouter>
+            <CreateProduct />
+          </BrowserRouter>
+        );
+      
+        const nameInput = screen.getByPlaceholderText("Enter a name");
+        const descInput = screen.getByPlaceholderText("Enter a description");
+        const priceInput = screen.getByPlaceholderText("Enter a price");
+        const quantityInput = screen.getByPlaceholderText("Enter a quantity");
+        const fileInput = screen.getByLabelText("Upload Photo", { selector: "input" });
+      
+        await act(async () => {
           await userEvent.type(nameInput, "Test Product");
           await userEvent.type(descInput, "This is a test product");
           await userEvent.type(priceInput, "99.99");
           await userEvent.type(quantityInput, "10");
           await userEvent.upload(fileInput, createTestFile());
+        });
       
           // Select category
-          const categorySelect = screen.getByText("Select a category");
-          fireEvent.mouseDown(categorySelect);
+          await act(async () => {
+            const categorySelect = screen.getByText("Select a category");
+            fireEvent.mouseDown(categorySelect);
+          });
+          
           await waitFor(() => {
             const option = screen.getByText("Electronics");
-            fireEvent.click(option);
+            
+            act(() => {
+              fireEvent.click(option);
+            });
           });
 
           // Select shipping
-        const selectContainer = screen.getByTestId("shipping-select");
-        const searchInput = selectContainer.querySelector('.ant-select-selection-search-input');
-
-        // Click directly on the input to open the dropdown
-        fireEvent.mouseDown(searchInput);
+          await act(async () => {
+            const selectContainer = screen.getByTestId("shipping-select");
+            const searchInput = selectContainer.querySelector(".ant-select-selection-search-input");
+          
+            // Click directly on the input to open the dropdown
+            fireEvent.mouseDown(searchInput);
+          });
         await waitFor(() => {
         const optionYes = document.querySelector('.ant-select-item-option[title="Yes"]') || 
                         document.querySelector('.ant-select-item-option-content:contains("Yes")');
-            if (optionYes) {
-                fireEvent.click(optionYes);
-            }
-        });
-      
-          // Submit form
-          fireEvent.click(screen.getByText("CREATE PRODUCT"));
+                        if (optionYes) {
+                          act(() => {
+                            fireEvent.click(optionYes);
+                          });
+                        }
+                      });
+                      
+                      // Submit form
+                      await act(async () => {
+                        fireEvent.click(screen.getByText("CREATE PRODUCT"));
+                      });
       
           await waitFor(() => {
             expect(axios.post).toHaveBeenCalledWith(
@@ -217,7 +231,7 @@ describe("CreateProduct Component", () => {
           });
         });
 
-        test("handles image size validation - too large", async () => {
+        it("handles image size validation - too large", async () => {
             render(
               <BrowserRouter>
                 <CreateProduct />
@@ -228,7 +242,7 @@ describe("CreateProduct Component", () => {
             const largeFile = createTestFile("large-image.jpg", "image/jpeg", 5 * 1024 * 1024);
             const fileInput = screen.getByLabelText("Upload Photo", { selector: "input" });
             
-            await userEvent.upload(fileInput, largeFile);
+            await act(async () => {await userEvent.upload(fileInput, largeFile)});
     
             await waitFor(() => {
               expect(screen.queryByAltText("product_photo")).not.toBeInTheDocument();
@@ -247,7 +261,7 @@ describe("CreateProduct Component", () => {
             const textFile = createTestFile("test.txt", "text/plain", 1024);
             const fileInput = screen.getByLabelText("Upload Photo", { selector: "input" });
 
-            await userEvent.upload(fileInput, textFile);
+            await act(async () => await userEvent.upload(fileInput, textFile));
 
             await waitFor(() => {
             expect(screen.queryByAltText("product_photo")).not.toBeInTheDocument();
@@ -264,6 +278,7 @@ describe("CreateProduct Component", () => {
             );
         
             // Fill all fields except name
+            await act(async () => {
             const descInput = screen.getByPlaceholderText("Enter a description");
             const priceInput = screen.getByPlaceholderText("Enter a price");
             const quantityInput = screen.getByPlaceholderText("Enter a quantity");
@@ -273,14 +288,15 @@ describe("CreateProduct Component", () => {
             await userEvent.type(quantityInput, "10");
         
             fireEvent.click(screen.getByText("CREATE PRODUCT"));
+            })
 
             await waitFor(() => {
                 expect(screen.getByText("Name is required")).toBeInTheDocument();
               });
           });
 
-        it("validates price boundary value - zero price", async () => {
-            jest.spyOn(toast, 'error');
+          it("validates price boundary value - zero price", async () => {
+            jest.spyOn(toast, "error");
           
             render(
               <BrowserRouter>
@@ -292,43 +308,50 @@ describe("CreateProduct Component", () => {
             const descriptionInput = screen.getByPlaceholderText("Enter a description");
             const priceInput = screen.getByPlaceholderText("Enter a price");
             const quantityInput = screen.getByPlaceholderText("Enter a quantity");
-            
+          
             // Select category
             const categorySelect = screen.getAllByRole("combobox")[0];
-            await userEvent.click(categorySelect);
-            fireEvent.change(categorySelect, { target: { value: "mockedCategoryId" } });
-            
-            // Select shipping
-            const selectContainer = screen.getByTestId("shipping-select");
-            const searchInput = selectContainer.querySelector('.ant-select-selection-search-input');
-
-            // Click directly on the input to open the dropdown
-            fireEvent.mouseDown(searchInput);
-            await waitFor(() => {
-            const optionYes = document.querySelector('.ant-select-item-option[title="Yes"]') || 
-                            document.querySelector('.ant-select-item-option-content:contains("Yes")');
-                if (optionYes) {
-                    fireEvent.click(optionYes);
-                }
+          
+            await act(async () => {
+              await userEvent.click(categorySelect);
+              fireEvent.change(categorySelect, { target: { value: "mockedCategoryId" } });
+          
+              // Select shipping
+              const selectContainer = screen.getByTestId("shipping-select");
+              const searchInput = selectContainer.querySelector(".ant-select-selection-search-input");
+          
+              // Click directly on the input to open the dropdown
+              fireEvent.mouseDown(searchInput);
             });
-        
-            await userEvent.type(nameInput, "Test Product");
-            await userEvent.type(descriptionInput, "Test Description");
-            await userEvent.type(quantityInput, "5");
-            
-            // Set price to zero
-            await userEvent.clear(priceInput);
-            await userEvent.type(priceInput, "0");
-          
-            fireEvent.click(screen.getByRole('button', { name: /CREATE PRODUCT/i }));
           
             await waitFor(() => {
-              expect(screen.getByText("Price must be greater than zero"));
+              const optionYes =
+                document.querySelector('.ant-select-item-option[title="Yes"]') ||
+                document.querySelector('.ant-select-item-option-content:contains("Yes")');
+              if (optionYes) {
+                fireEvent.click(optionYes);
+              }
+            });
+          
+            await act(async () => {
+              await userEvent.type(nameInput, "Test Product");
+              await userEvent.type(descriptionInput, "Test Description");
+              await userEvent.type(quantityInput, "5");
+          
+              // Set price to zero
+              await userEvent.clear(priceInput);
+              await userEvent.type(priceInput, "0");
+          
+              fireEvent.click(screen.getByRole("button", { name: /CREATE PRODUCT/i }));
+            });
+          
+            await waitFor(() => {
+              expect(screen.getByText("Price must be greater than zero")).toBeInTheDocument();
             });
           });
-
+          
           it("validates price boundary value - decimal places", async () => {
-            jest.spyOn(toast, 'error');
+            jest.spyOn(toast, "error");
           
             render(
               <BrowserRouter>
@@ -340,44 +363,50 @@ describe("CreateProduct Component", () => {
             const descriptionInput = screen.getByPlaceholderText("Enter a description");
             const priceInput = screen.getByPlaceholderText("Enter a price");
             const quantityInput = screen.getByPlaceholderText("Enter a quantity");
-            
+          
             // Select category
             const categorySelect = screen.getAllByRole("combobox")[0];
-            await userEvent.click(categorySelect);
-            fireEvent.change(categorySelect, { target: { value: "mockedCategoryId" } });
-            
-            // Select shipping
-            const selectContainer = screen.getByTestId("shipping-select");
-            const searchInput = selectContainer.querySelector('.ant-select-selection-search-input');
-
-            // Click directly on the input to open the dropdown
-            fireEvent.mouseDown(searchInput);
-            await waitFor(() => {
-            const optionYes = document.querySelector('.ant-select-item-option[title="Yes"]') || 
-                            document.querySelector('.ant-select-item-option-content:contains("Yes")');
-                if (optionYes) {
-                    fireEvent.click(optionYes);
-                }
-            });
-        
-            await userEvent.type(nameInput, "Test Product");
-            await userEvent.type(descriptionInput, "Test Description");
-            await userEvent.type(quantityInput, "5");
-            
-            // Set price to zero
-            await userEvent.clear(priceInput);
-            await userEvent.type(priceInput, "2728.27728");
           
-            fireEvent.click(screen.getByRole('button', { name: /CREATE PRODUCT/i }));
+            await act(async () => {
+              await userEvent.click(categorySelect);
+              fireEvent.change(categorySelect, { target: { value: "mockedCategoryId" } });
+          
+              // Select shipping
+              const selectContainer = screen.getByTestId("shipping-select");
+              const searchInput = selectContainer.querySelector(".ant-select-selection-search-input");
+          
+              // Click directly on the input to open the dropdown
+              fireEvent.mouseDown(searchInput);
+            });
           
             await waitFor(() => {
-              expect(screen.getByText("Price can only be up to 2 decimal places"));
+              const optionYes =
+                document.querySelector('.ant-select-item-option[title="Yes"]') ||
+                document.querySelector('.ant-select-item-option-content:contains("Yes")');
+              if (optionYes) {
+                fireEvent.click(optionYes);
+              }
             });
-          });
-
+          
+            await act(async () => {
+              await userEvent.type(nameInput, "Test Product");
+              await userEvent.type(descriptionInput, "Test Description");
+              await userEvent.type(quantityInput, "5");
+          
+              // Set price to an invalid decimal value
+              await userEvent.clear(priceInput);
+              await userEvent.type(priceInput, "2728.27728");
+          
+              fireEvent.click(screen.getByRole("button", { name: /CREATE PRODUCT/i }));
+            });
+          
+            await waitFor(() => {
+              expect(screen.getByText("Price can only be up to 2 decimal places")).toBeInTheDocument();
+            });
+          });          
 
           it("validates quantity boundary value - negative quantity", async () => {
-            jest.spyOn(toast, 'error');
+            jest.spyOn(toast, "error");
           
             render(
               <BrowserRouter>
@@ -389,65 +418,74 @@ describe("CreateProduct Component", () => {
             const descriptionInput = screen.getByPlaceholderText("Enter a description");
             const priceInput = screen.getByPlaceholderText("Enter a price");
             const quantityInput = screen.getByPlaceholderText("Enter a quantity");
-            
+          
             // Select category
             const categorySelect = screen.getAllByRole("combobox")[0];
-            await userEvent.click(categorySelect);
-            fireEvent.change(categorySelect, { target: { value: "mockedCategoryId" } });
-            
-            // Select shipping
-            const selectContainer = screen.getByTestId("shipping-select");
-            const searchInput = selectContainer.querySelector('.ant-select-selection-search-input');
-
-            // Click directly on the input to open the dropdown
-            fireEvent.mouseDown(searchInput);
-            await waitFor(() => {
-            const optionYes = document.querySelector('.ant-select-item-option[title="Yes"]') || 
-                            document.querySelector('.ant-select-item-option-content:contains("Yes")');
-                if (optionYes) {
-                    fireEvent.click(optionYes);
-                }
+          
+            await act(async () => {
+              await userEvent.click(categorySelect);
+              fireEvent.change(categorySelect, { target: { value: "mockedCategoryId" } });
+          
+              // Select shipping
+              const selectContainer = screen.getByTestId("shipping-select");
+              const searchInput = selectContainer.querySelector(".ant-select-selection-search-input");
+          
+              fireEvent.mouseDown(searchInput);
             });
-            
-            // Fill fields
-            await userEvent.type(nameInput, "Test Product");
-            await userEvent.type(descriptionInput, "Test Description");
-            await userEvent.type(priceInput, "10");
-            
-            // Set quantity to negative
-            await userEvent.clear(quantityInput);
-            await userEvent.type(quantityInput, "-1");
-          
-            // Submit the form
-            fireEvent.click(screen.getByRole('button', { name: /CREATE PRODUCT/i }));
           
             await waitFor(() => {
-                expect(screen.getByText("Quantity cannot be negative"));
-            })
-        })
-
+              const optionYes =
+                document.querySelector('.ant-select-item-option[title="Yes"]') ||
+                document.querySelector('.ant-select-item-option-content:contains("Yes")');
+              if (optionYes) {
+                fireEvent.click(optionYes);
+              }
+            });
+          
+            await act(async () => {
+              await userEvent.type(nameInput, "Test Product");
+              await userEvent.type(descriptionInput, "Test Description");
+              await userEvent.type(priceInput, "10");
+          
+              // Set quantity to negative
+              await userEvent.clear(quantityInput);
+              await userEvent.type(quantityInput, "-1");
+          
+              fireEvent.click(screen.getByRole("button", { name: /CREATE PRODUCT/i }));
+            });
+          
+            await waitFor(() => {
+              expect(screen.getByText("Quantity cannot be negative")).toBeInTheDocument();
+            });
+          });
+          
           it("validates that shipping option is selected", async () => {
             render(
               <BrowserRouter>
                 <CreateProduct />
               </BrowserRouter>
             );
-        
+          
             const nameInput = screen.getByPlaceholderText("Enter a name");
-            await userEvent.type(nameInput, "Test Product");
-        
-            const categorySelect = screen.getByText("Select a category");
-            fireEvent.mouseDown(categorySelect);
+          
+            await act(async () => {
+              await userEvent.type(nameInput, "Test Product");
+          
+              const categorySelect = screen.getByText("Select a category");
+              fireEvent.mouseDown(categorySelect);
+            });
+          
             await waitFor(() => {
               const option = screen.getByText("Electronics");
               fireEvent.click(option);
             });
-        
-            // Submit form without selecting shipping
-            fireEvent.click(screen.getByText("CREATE PRODUCT"));
-        
-            await waitFor(() => {
-              expect(screen.getByText("Please select a shipping option"));
+          
+            await act(async () => {
+              fireEvent.click(screen.getByText("CREATE PRODUCT"));
             });
-          });
+          
+            await waitFor(() => {
+              expect(screen.getByText("Please select a shipping option")).toBeInTheDocument();
+            });
+          });          
     })

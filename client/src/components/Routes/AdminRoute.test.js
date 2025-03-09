@@ -1,10 +1,9 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import AdminRoute from '../Routes/AdminRoute';
 import { useAuth } from '../../context/auth';
 import axios from 'axios';
-import { use } from 'react';
 
 // Mock dependencies
 jest.mock('axios');
@@ -51,7 +50,7 @@ describe('AdminRoute Component', () => {
         useAuth.mockReturnValue([{ token: 'fake-token' }, jest.fn()]);
         axios.get.mockResolvedValue({ data: { ok: false } });
 
-        render(<AdminRoute />)
+        await act(async () => render(<AdminRoute />))
 
         expect(screen.getByTestId('spinner')).toBeInTheDocument();
 
@@ -62,20 +61,20 @@ describe('AdminRoute Component', () => {
       });
     })
 
-    it("does not make API call when no auth token is present", () => {
+    it("does not make API call when no auth token is present", async () => {
         useAuth.mockReturnValue([{ token: null }, jest.fn()]);
 
-        render(<AdminRoute />)
+        await act(async () => render(<AdminRoute />))
 
         expect(screen.getByTestId('spinner')).toBeInTheDocument();
         expect(axios.get).not.toHaveBeenCalled();
     })
 
-    it("makes API call with correct endpoint", () => {
+    it("makes API call with correct endpoint", async () => {
         useAuth.mockReturnValue([{ token: 'fake-token' }, jest.fn()]);
         axios.get.mockResolvedValue({ data: { ok: true } });
 
-        render(<AdminRoute />)
+        await act(async () => render(<AdminRoute />))
 
         expect(axios.get).toHaveBeenCalledWith('/api/v1/auth/admin-auth');
     })
@@ -84,7 +83,7 @@ describe('AdminRoute Component', () => {
         useAuth.mockReturnValue([{ token: 'fake-token' }, jest.fn()]);
         axios.get.mockResolvedValue({ data: { ok: true } });
     
-        render(<AdminRoute />);
+        await act(async () => render(<AdminRoute />))
         
         // After API resolves, should show outlet (indicates setOk(true) was called)
         await waitFor(() => {
@@ -96,7 +95,7 @@ describe('AdminRoute Component', () => {
         useAuth.mockReturnValue([{ token: 'fake-token' }, jest.fn()]);
         axios.get.mockResolvedValue({ data: { ok: false } });
     
-        render(<AdminRoute />);
+        await act(async () => render(<AdminRoute />))
         
         // After API resolves, should show outlet (indicates setOk(true) was called)
         await waitFor(() => {
