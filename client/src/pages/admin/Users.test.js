@@ -32,7 +32,7 @@ describe("Users Component", () => {
         phone: '1234567890',
         address: '123 Main St',
         role: 1,
-        createdAt: '2024-03-08T00:00:00.000Z'
+        createdAt: '2024-04-08T00:00:00.000Z'
       },
       {
         _id: '2',
@@ -96,7 +96,7 @@ describe("Users Component", () => {
         expect(userBadge.closest('.badge')).toHaveClass('bg-primary');
         
         // Check dates are formatted correctly
-        expect(screen.getByText('08/03/2024')).toBeInTheDocument();
+        expect(screen.getByText('08/04/2024')).toBeInTheDocument();
         expect(screen.getByText('08/03/2025')).toBeInTheDocument();
     });
 
