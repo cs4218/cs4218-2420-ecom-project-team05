@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   // name displayed during tests
   displayName: "frontend",
 
@@ -13,7 +13,7 @@ export default {
 
   // tells jest how to handle css/scss imports in your tests
   moduleNameMapper: {
-    "\\.(css|scss)$": "identity-obj-proxy",
+    "\\.(css|scss|less|sass)$": "identity-obj-proxy",
   },
 
   // ignore all node_modules except styleMock (needed for css imports)
@@ -26,7 +26,7 @@ export default {
   ],
   // jest code coverage
   collectCoverage: true,
-  collectCoverageFrom: ["client/src/pages/**/**"],
+  collectCoverageFrom: ["client/src/**/**/**"],
   coverageThreshold: {
     global: {
       lines: 0,
