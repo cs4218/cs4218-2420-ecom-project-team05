@@ -11,6 +11,8 @@ import {
   deleteProductController,
   realtedProductController,
   searchProductController,
+  brainTreePaymentController,
+  braintreeTokenController,
 } from "./productController";
 import productModel from "../models/productModel.js";
 import categoryModel from "../models/categoryModel.js";
@@ -39,8 +41,13 @@ beforeEach(async () => {
 // Mock the braintree module
 jest.mock("braintree", () => ({
   BraintreeGateway: jest.fn().mockImplementation(() => ({
+    clientToken: {
+      generate: jest.fn((_, cb) =>
+        cb(null, { success: true, clientToken: "fake-token" })
+      ),
+    },
     transaction: {
-      sale: jest.fn().mockResolvedValue({ success: true }),
+      sale: jest.fn((data, callback) => callback(null, { success: true })),
     },
   })),
   Environment: {
@@ -52,7 +59,10 @@ describe("Product Controllers", () => {
   let category, product1, product2, product3;
 
   beforeEach(async () => {
-    category = await categoryModel.create({ name: "Test Category" });
+    category = await categoryModel.create({
+      name: "Test Category",
+      slug: "test-category",
+    });
 
     product1 = await productModel.create({
       name: "Test Product",
@@ -332,4 +342,69 @@ describe("Product Controllers", () => {
     expect(res.send.mock.calls[0][0].products.length).toBe(1);
     expect(res.send.mock.calls[0][0].products[0]._id).not.toBe(product1._id);
   });
+
+  test("productCategoryController should return category and products", async () => {
+    const req = { params: { slug: "test-category" } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    await productCategoryController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        category: expect.objectContaining({ name: "Test Category" }),
+        products: expect.arrayContaining([
+          expect.objectContaining({ name: "Test Product" }),
+        ]),
+      })
+    );
+  });
+
+  test("braintreeTokenController should return a token", async () => {
+    const req = {};
+    const res = {
+      send: jest.fn(),
+      status: jest.fn().mockReturnThis(),
+    };
+
+    await braintreeTokenController(req, res);
+
+    expect(res.send).toHaveBeenCalledWith({
+      success: true,
+      clientToken: "fake-token",
+    });
+  });
+
+  it("brainTreePaymentController should process payment", async () => {
+    const mockProductId1 = new mongoose.Types.ObjectId();
+    const mockProductId2 = new mongoose.Types.ObjectId();
+  
+    const req = {
+      body: {
+        nonce: "fake-nonce",
+        cart: [
+          { _id: mockProductId1, price: 100 },
+          { _id: mockProductId2, price: 50 }
+        ],
+      },
+      user: { _id: new mongoose.Types.ObjectId() },
+    };
+    
+    const res = {
+      json: jest.fn(),
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+  
+    orderModel.prototype.save = jest.fn().mockResolvedValue({});
+  
+    await brainTreePaymentController(req, res);
+  
+    expect(res.json).toHaveBeenCalledWith({ ok: true });
+  });
+  
 });
