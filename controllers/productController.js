@@ -100,7 +100,7 @@ export const getSingleProductController = async (req, res) => {
         product,
       });
     } else {
-      throw new Error("Error while getting single product")
+      throw new Error("Error while getting single product");
     }
   } catch (error) {
     console.log(error);
@@ -133,11 +133,19 @@ export const productPhotoController = async (req, res) => {
 //delete controller
 export const deleteProductController = async (req, res) => {
   try {
-    await productModel.findByIdAndDelete(req.params.pid).select("-photo");
-    res.status(200).send({
-      success: true,
-      message: "Product Deleted successfully",
-    });
+    const deletedProduct = await productModel
+      .findByIdAndDelete(req.params.pid)
+      .select("-photo");
+
+    console.log("deletedproduct: ", deletedProduct);
+    if (deletedProduct) {
+      res.status(200).send({
+        success: true,
+        message: "Product Deleted successfully",
+      });
+    } else {
+      throw new Error("Error while deleting product");
+    }
   } catch (error) {
     console.log(error);
     res.status(500).send({

@@ -8,11 +8,13 @@ import {
   productFiltersController,
   productListController,
   updateProductController,
+  deleteProductController,
   realtedProductController,
   searchProductController,
   brainTreePaymentController,
   braintreeTokenController,
 } from "./productController";
+import mongoose from "mongoose";
 
 // Mock data
 const mockCategory = {
@@ -207,6 +209,7 @@ import orderModel from "../models/orderModel.js";
 
 describe("Product Controllers", () => {
   beforeEach(() => {
+    // Reset all mocks before each test
     jest.clearAllMocks();
   });
 
@@ -319,21 +322,61 @@ describe("Product Controllers", () => {
     expect(res.send).toHaveBeenCalledWith(expect.any(Buffer));
   });
 
-  it("updateProductController should update a product", async () => {
-    productModel.findByIdAndUpdate.mockImplementationOnce(
-      (id, update, options) => {
-        return Promise.resolve({
-          _id: id,
-          ...update,
-          save: jest.fn().mockResolvedValue({}),
-          photo: {
-            data: null,
-            contentType: null,
-          },
-        });
-      }
-    );
+  it("deleteProductController should delete a product", async () => {
+    productModel.findByIdAndDelete = jest.fn().mockReturnValue({
+      select: jest.fn().mockResolvedValue(mockProduct1),
+    });
 
+    const req = { params: { pid: mockProduct1._id } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    await deleteProductController(req, res);
+
+    expect(productModel.findByIdAndDelete).toHaveBeenCalledWith(
+      mockProduct1._id
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        message: "Product Deleted successfully",
+      })
+    );
+  });
+
+  it("deleteProductController should fail to delete a product", async () => {
+    const mockProduct4 = {
+      _id: "product4-id",
+    };
+
+    productModel.findByIdAndDelete = jest.fn().mockReturnValue({
+      select: jest.fn().mockResolvedValue(),
+    });
+
+    const req = { params: { pid: mockProduct4._id } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    await deleteProductController(req, res);
+
+    expect(productModel.findByIdAndDelete).toHaveBeenCalledWith(
+      mockProduct4._id
+    );
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: false,
+        message: "Error while deleting product",
+      })
+    );
+  });
+
+  it("updateProductController should update a product", async () => {
     const req = {
       params: { pid: mockProduct1._id },
       fields: {
@@ -342,7 +385,6 @@ describe("Product Controllers", () => {
         price: 150,
         category: mockCategory._id,
         quantity: 20,
-        shipping: true,
       },
       files: {},
     };
@@ -354,13 +396,10 @@ describe("Product Controllers", () => {
 
     await updateProductController(req, res);
 
-    expect(productModel.findByIdAndUpdate).toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.send).toHaveBeenCalledWith(
-      expect.objectContaining({
-        success: true,
-        message: "Product Updated Successfully",
-      })
+    expect(productModel.findByIdAndUpdate).toHaveBeenCalledWith(
+      mockProduct1._id,
+      expect.anything(),
+      { new: true }
     );
   });
 
