@@ -23,9 +23,70 @@ const Profile = () => {
     setAddress(address);
   }, [auth?.user]);
 
+  // Validation functions
+  const validateName = () => {
+    if (name.length < 3) {
+      toast.error("Name should be at least 3 characters long");
+      return false;
+    }
+    if (/^\d+$/.test(name) || !/[a-zA-Z]/.test(name)) {
+      toast.error("Name should contain letters, not just numbers or symbols");
+      return false;
+    }
+    return true;
+  };
+
+  const validatePassword = () => {
+    if (password === "") return true;
+    
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters long");
+      return false;
+    }
+    if (!/[a-zA-Z]/.test(password) || !/\d/.test(password)) {
+      toast.error("Password must contain at least one letter and one number");
+      return false;
+    }
+    return true;
+  }
+
+  const validatePhone = () => {
+    const digitsOnly = phone.replace(/\D/g, "");
+    
+    if (/[a-zA-Z]/.test(phone)) {
+      toast.error("Phone number should not contain letters");
+      return false;
+    }
+    
+    if (digitsOnly.length < 10 || digitsOnly.length > 15) {
+      toast.error("Phone number should be between 10-15 digits");
+      return false;
+    }
+    
+    return true;
+  }
+
+  const validateAddress = () => {
+    if (!address || address.trim() === "") {
+      toast.error("Address is required");
+      return false;
+    }
+    return true;
+  };
+
+  const validateForm = () => {
+    return (
+      validateName() &&
+      validatePassword() &&
+      validatePhone() &&
+      validateAddress()
+    );
+  };
+
   // form function
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if(!validateForm()) return
     try {
       const { data } = await axios.put("/api/v1/auth/profile", {
         name,
@@ -34,7 +95,7 @@ const Profile = () => {
         phone,
         address,
       });
-      if (data?.errro) {
+      if (data?.error) {
         toast.error(data?.error);
       } else {
         setAuth({ ...auth, user: data?.updatedUser });

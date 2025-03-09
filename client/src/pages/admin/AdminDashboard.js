@@ -2,8 +2,16 @@ import React from "react";
 import AdminMenu from "../../components/AdminMenu";
 import Layout from "./../../components/Layout";
 import { useAuth } from "../../context/auth";
+import { useNavigate } from "react-router-dom";
 const AdminDashboard = () => {
   const [auth] = useAuth();
+  const navigate = useNavigate();
+
+  if (!auth?.user) {
+    navigate("/login"); // Added this in to prevent unauthenticated users from accessing this page
+    return null;
+  }
+
   return (
     <Layout>
       <div className="container-fluid m-3 p-3">
