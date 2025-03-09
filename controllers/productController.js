@@ -100,7 +100,7 @@ export const getSingleProductController = async (req, res) => {
         product,
       });
     } else {
-      throw new Error("Error while getitng single product")
+      throw new Error("Error while getting single product")
     }
   } catch (error) {
     console.log(error);

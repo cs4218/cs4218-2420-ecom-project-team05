@@ -2,6 +2,13 @@ import {
   createProductController,
   getProductController,
   getSingleProductController,
+  productPhotoController,
+  productCategoryController,
+  productCountController,
+  productFiltersController,
+  productListController,
+  updateProductController,
+  deleteProductController,
 } from "./productController";
 import productModel from "../models/productModel.js";
 import categoryModel from "../models/categoryModel.js";
@@ -43,10 +50,8 @@ describe("Product Controllers", () => {
   let category, product;
 
   beforeEach(async () => {
-    // Create a test category
     category = await categoryModel.create({ name: "Test Category" });
 
-    // Create a test product
     product = await productModel.create({
       name: "Test Product",
       slug: "test-product",
@@ -54,6 +59,10 @@ describe("Product Controllers", () => {
       price: 100,
       category: category._id,
       quantity: 10,
+      photo: {
+        data: Buffer.from("test image data"),
+        contentType: "image/png",
+      },
     });
   });
 
@@ -142,8 +151,95 @@ describe("Product Controllers", () => {
     expect(res.send).toHaveBeenCalledWith(
       expect.objectContaining({
         success: false,
-        message: expect.stringMatching(/Error while getitng single product/i),
+        message: expect.stringMatching(/Error while getting single product/i),
       })
     );
+  });
+
+  test("productPhotoController should return product photo", async () => {
+    const req = { params: { pid: product._id } };
+    const res = {
+      set: jest.fn(),
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    await productPhotoController(req, res);
+
+    expect(res.set).toHaveBeenCalledWith("Content-type", "image/png");
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith(expect.any(Buffer));
+  });
+
+  test("deleteProductController should delete a product", async () => {
+    const req = { params: { pid: product._id } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    await deleteProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        message: "Product Deleted successfully",
+      })
+    );
+
+    const deletedProduct = await productModel.findById(product._id);
+    expect(deletedProduct).toBeNull();
+  });
+
+  test("updateProductController should update a product", async () => {
+    const req = {
+      params: { pid: product._id },
+      fields: {
+        name: "Updated Product",
+        description: "Updated description",
+        price: 150,
+        category: category._id.toString(),
+        quantity: 20,
+      },
+      files: {},
+    };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    await updateProductController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        message: "Product Updated Successfully",
+      })
+    );
+
+    const updatedProduct = await productModel.findById(product._id);
+    expect(updatedProduct.name).toBe("Updated Product");
+    expect(updatedProduct.price).toBe(150);
+  });
+
+  test("productFiltersController should return filtered products", async () => {
+    const req = { body: { checked: [category._id], radio: [50, 200] } };
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+
+    await productFiltersController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        products: expect.any(Array),
+      })
+    );
+    expect(res.send.mock.calls[0][0].products.length).toBe(1);
   });
 });
