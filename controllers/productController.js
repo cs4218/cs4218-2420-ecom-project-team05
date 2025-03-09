@@ -42,8 +42,10 @@ export const createProductController = async (req, res) => {
     }
 
     const products = new productModel({ ...req.fields, slug: slugify(name) });
+
     if (photo) {
-      products.photo.data = fs.readFileSync(photo.path);
+      products.photo.data =
+        photo.path != "" ? fs.readFileSync(photo.path) : Buffer("");
       products.photo.contentType = photo.type;
     }
     await products.save();
@@ -117,11 +119,13 @@ export const getSingleProductController = async (req, res) => {
 export const productPhotoController = async (req, res) => {
   try {
     const product = await productModel.findById(req.params.pid).select("photo");
+
+    if (!product) {
+      throw new Error("Erorr while getting photo");
+    }
     if (product.photo.data) {
       res.set("Content-type", product.photo.contentType);
       return res.status(200).send(product.photo.data);
-    } else {
-      throw new Error("Erorr while getting photo");
     }
   } catch (error) {
     console.log(error);
@@ -213,6 +217,9 @@ export const productFiltersController = async (req, res) => {
     const { checked, radio } = req.body;
     let args = {};
     if (checked.length > 0) args.category = checked;
+    if (radio[0] < 0 || radio[1] < 0) {
+      throw new Error("Price cannot be negative");
+    }
     if (radio.length) args.price = { $gte: radio[0], $lte: radio[1] };
     const products = await productModel.find(args);
     res.status(200).send({
