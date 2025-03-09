@@ -22,6 +22,7 @@ export const createProductController = async (req, res) => {
     const { name, description, price, category, quantity, shipping } =
       req.fields;
     const { photo } = req.files;
+
     //alidation
     switch (true) {
       case !name:
@@ -119,6 +120,8 @@ export const productPhotoController = async (req, res) => {
     if (product.photo.data) {
       res.set("Content-type", product.photo.contentType);
       return res.status(200).send(product.photo.data);
+    } else {
+      throw new Error("Erorr while getting photo");
     }
   } catch (error) {
     console.log(error);
@@ -137,7 +140,6 @@ export const deleteProductController = async (req, res) => {
       .findByIdAndDelete(req.params.pid)
       .select("-photo");
 
-    console.log("deletedproduct: ", deletedProduct);
     if (deletedProduct) {
       res.status(200).send({
         success: true,
