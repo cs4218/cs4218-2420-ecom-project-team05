@@ -92,16 +92,21 @@ export const getSingleProductController = async (req, res) => {
       .findOne({ slug: req.params.slug })
       .select("-photo")
       .populate("category");
-    res.status(200).send({
-      success: true,
-      message: "Single Product Fetched",
-      product,
-    });
+
+    if (product) {
+      res.status(200).send({
+        success: true,
+        message: "Single Product Fetched",
+        product,
+      });
+    } else {
+      throw new Error("Error while getitng single product")
+    }
   } catch (error) {
     console.log(error);
     res.status(500).send({
       success: false,
-      message: "Eror while getitng single product",
+      message: error.message,
       error,
     });
   }
