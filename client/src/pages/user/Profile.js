@@ -57,12 +57,13 @@ const Profile = () => {
       toast.error("Phone number should not contain letters");
       return false;
     }
-    
-    if (digitsOnly.length < 10 || digitsOnly.length > 15) {
-      toast.error("Phone number should be between 10-15 digits");
+    if (digitsOnly.length < 7){
+      toast.error("Phone number is too short.");
       return false;
-    }
-    
+    } else if (digitsOnly.length > 15) {
+      toast.error("Phone number is too long.")
+      return false;
+    } 
     return true;
   }
 

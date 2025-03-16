@@ -357,7 +357,15 @@ describe("Profile Component", () => {
           fireEvent.click(submitButton);
           
           await waitFor(() => {
-            expect(toast.error).toHaveBeenCalledWith('Phone number should be between 10-15 digits');
+            expect(toast.error).toHaveBeenCalledWith('Phone number is too short.');
+          });
+
+          // Test with too long phone number
+          fireEvent.change(phoneInput, { target: { value: '12362289973673222' } });
+          fireEvent.click(submitButton);
+          
+          await waitFor(() => {
+            expect(toast.error).toHaveBeenCalledWith('Phone number is too long.');
           });
           
           // Test with formatted phone number
