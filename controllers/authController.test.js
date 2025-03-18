@@ -689,7 +689,7 @@ describe('getAllOrdersController unit tests', () => {
     expect(orderModel.find).toHaveBeenCalledWith({});
     expect(firstPopulateMock).toHaveBeenCalledWith('products', '-photo');
     expect(secondPopulateMock).toHaveBeenCalledWith('buyer', 'name');
-    expect(sortMock).toHaveBeenCalledWith({ createdAt: '-1' });
+    expect(sortMock).toHaveBeenCalledWith({ createdAt: -1 });
     expect(res.json).toHaveBeenCalledWith(mockOrders);
   });
 
@@ -706,7 +706,7 @@ describe('getAllOrdersController unit tests', () => {
 
     await getAllOrdersController(req, res);
 
-    expect(sortMock).toHaveBeenCalledWith({ createdAt: '-1' });
+    expect(sortMock).toHaveBeenCalledWith({ createdAt: -1 });
   });
 
   it('should handle database errors', async () => {
