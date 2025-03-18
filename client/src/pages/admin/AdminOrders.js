@@ -16,7 +16,7 @@ const AdminOrders = () => {
     "Delivered",
     "Cancelled",
   ]);
-  const [changeStatus, setCHangeStatus] = useState("");
+  const [changeStatus, setChangeStatus] = useState("");
   const [orders, setOrders] = useState([]);
   const [auth, setAuth] = useAuth();
   const getOrders = async () => {
@@ -24,7 +24,8 @@ const AdminOrders = () => {
       const { data } = await axios.get("/api/v1/auth/all-orders");
       setOrders(data);
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching orders:", error.response?.data || error.message);
+      toast.error("Failed to load orders");
     }
   };
 
@@ -82,7 +83,7 @@ const AdminOrders = () => {
                         </Select>
                       </td>
                       <td>{o?.buyer?.name}</td>
-                      <td>{moment(o?.createAt).fromNow()}</td>
+                      <td>{moment(o?.createdAt).format('DD-MM-YYYY, hh:mm A')}</td>
                       <td>{o?.payment.success ? "Success" : "Failed"}</td>
                       <td>{o?.products?.length}</td>
                     </tr>
