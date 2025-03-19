@@ -88,13 +88,17 @@ const UpdateProduct = () => {
 
   //delete a product
   const handleDelete = async () => {
+    // if products in this category, say cannot delete
+    // have to update the categories of the products
     try {
       let answer = window.prompt("Are you sure you want to delete this product?");
       if (!answer) return;
       const { data } = await axios.delete(
         `/api/v1/product/delete-product/${id}`
       );
-      toast.success("Product Deleted Successfully");
+      setTimeout(() => {
+        toast.success("Product Deleted Successfully");
+      }, 1000);
       navigate("/dashboard/admin/products");
     } catch (error) {
       console.log(error);

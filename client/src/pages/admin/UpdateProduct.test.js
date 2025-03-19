@@ -561,11 +561,12 @@ describe("UpdateProduct Component", () => {
       });
       
       it("successfully deletes a product", async () => {
+        jest.useFakeTimers();
+        
         axios.delete.mockResolvedValueOnce({
           data: { success: true, message: "Product deleted successfully" },
         });
       
-        // Mock window.prompt
         global.window.prompt = jest.fn(() => "yes");
       
         await act(async () => {
@@ -580,7 +581,6 @@ describe("UpdateProduct Component", () => {
           expect(screen.getByDisplayValue("Test Product")).toBeInTheDocument();
         });
       
-        // Click delete button
         const deleteButton = screen.getByText("DELETE PRODUCT");
         await act(async () => {
           fireEvent.click(deleteButton);
@@ -596,7 +596,13 @@ describe("UpdateProduct Component", () => {
           );
         });
       
+        await act(async () => {
+          jest.advanceTimersByTime(1000);
+        });
+
         expect(toast.success).toHaveBeenCalledWith("Product Deleted Successfully");
+        
+        jest.useRealTimers();
       });
       
       it("cancels product deletion when prompt is dismissed", async () => {
