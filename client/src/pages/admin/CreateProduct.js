@@ -31,7 +31,7 @@ const CreateProduct = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something went wrong in getting catgeory");
+      toast.error("Something went wrong in getting category");
     }
   };
 
@@ -132,7 +132,9 @@ const CreateProduct = () => {
       );
 
       if (data?.success) {
-        toast.success("Product Created Successfully");
+        setTimeout(() => {
+          toast.success("Product Created Successfully");
+        }, 1000);
         resetForm()
         navigate("/dashboard/admin/products");
       } else {
@@ -173,7 +175,7 @@ const CreateProduct = () => {
                 size="large"
                 showSearch
                 className={`form-select mb-3 ${errors.category ? 'border-danger' : ''}`}
-                value = {shipping || undefined}
+                value = {category || undefined}
                 onChange={(value) => {
                   setCategory(value);
                   setErrors({...errors, category: null})

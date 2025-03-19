@@ -119,7 +119,7 @@ describe("CreateProduct Component", () => {
         );
     
         await waitFor(() => {
-          expect(toast.error).toHaveBeenCalledWith("Something went wrong in getting catgeory");
+          expect(toast.error).toHaveBeenCalledWith("Something went wrong in getting category");
         });
       });
 
