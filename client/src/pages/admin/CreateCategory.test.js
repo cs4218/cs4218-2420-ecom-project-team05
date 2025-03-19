@@ -433,7 +433,7 @@ describe("CreateCategory Component", () => {
         render(<CreateCategory />);
     
         await waitFor(() => {
-          expect(toast.error).toHaveBeenCalledWith("Something went wrong in getting catgeory");
+          expect(toast.error).toHaveBeenCalledWith("Something went wrong in getting category");
         });
       });
     

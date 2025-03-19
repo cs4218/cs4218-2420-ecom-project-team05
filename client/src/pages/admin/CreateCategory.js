@@ -53,7 +53,7 @@ const CreateCategory = () => {
       }
     } catch (error) {
       console.log(error);
-      toast.error("Something went wrong in getting catgeory");
+      toast.error("Something went wrong in getting category");
     }
   };
 
@@ -85,6 +85,8 @@ const CreateCategory = () => {
   //delete category
   const handleDelete = async (pId) => {
     try {
+      // if there are products in this category, we cannot delete.
+      // have to update the product's category before deleting
       const { data } = await axios.delete(
         `/api/v1/category/delete-category/${pId}`
       );
