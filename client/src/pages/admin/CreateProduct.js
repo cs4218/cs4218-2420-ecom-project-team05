@@ -172,6 +172,7 @@ const CreateProduct = () => {
               <Select
                 variant={false}
                 placeholder="Select a category"
+                data-testid="category-select"
                 size="large"
                 showSearch
                 className={`form-select mb-3 ${errors.category ? 'border-danger' : ''}`}
