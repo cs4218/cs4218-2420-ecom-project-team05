@@ -1,7 +1,16 @@
 import { test, expect } from '@playwright/test';
 
+test("should display error page when page not found", async({ page }) => {
+    await page.goto('http://localhost:3000/random')
+    await expect(page.getByRole('main')).toMatchAriaSnapshot(`
+        - heading /\\d+/ [level=1]
+        - heading "Oops ! Page Not Found" [level=2]
+        - link "Go Back"
+        `);
+})
+
 test("should allow me to navigate to footer pages when clicked", async ({ page }) => {
-    await page.goto('http://localhost:3000/');
+    await page.goto('http://localhost:3000/', { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('text="All Products"');
 
     await page.getByRole('link', { name: 'Contact' }).click();
@@ -15,7 +24,7 @@ test("should allow me to navigate to footer pages when clicked", async ({ page }
 })
 
 test("should allow me to navigate between pages as a user", async ({ page }) => {
-    await page.goto('http://localhost:3000/');
+    await page.goto('http://localhost:3000/', { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('text="All Products"');
 
     await page.getByRole('link', { name: 'Login' }).click();
@@ -34,15 +43,8 @@ test("should allow me to navigate between pages as a user", async ({ page }) => 
 
     await page.getByRole('button', { name: 'user' }).click();
     await page.getByRole('link', { name: 'Dashboard' }).click();
-    await expect(page.getByRole('main')).toMatchAriaSnapshot(`
-        - main:
-        - heading "Dashboard" [level=4]
-        - link "Profile"
-        - link "Orders"
-        - heading "user" [level=3]
-        - heading "user@user.com" [level=3]
-        - heading /\\d+ user/ [level=3]
-        `);
+    await expect(page.getByText('DashboardProfileOrders')).toBeVisible();
+    await expect(page.getByText('useruser@user.com123 user')).toBeVisible();
 
     await page.getByRole('link', { name: 'Cart' }).click();
     await expect(page.locator('h1')).toContainText('Hello user');
@@ -63,8 +65,8 @@ test("should allow me to navigate between pages as a user", async ({ page }) => 
 })
 
 test("should allow me to navigate between pages as a guest", async ({ page }) => {
-    await page.waitForTimeout(500);
-    await page.goto('http://localhost:3000/');
+    // await page.waitForTimeout(500);
+    await page.goto('http://localhost:3000/', { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('text="All Products"');
 
     await expect(page.getByRole('img', { name: 'bannerimage' })).toBeVisible();
@@ -83,11 +85,6 @@ test("should allow me to navigate between pages as a guest", async ({ page }) =>
     await expect(page.locator('h1')).toContainText('Hello Guest');
 })
 
-test("should display error page when page not found", async({ page }) => {
-    await page.goto('http://localhost:3000/random')
-    await expect(page.getByRole('main')).toMatchAriaSnapshot(`
-        - heading /\\d+/ [level=1]
-        - heading "Oops ! Page Not Found" [level=2]
-        - link "Go Back"
-        `);
-})
+test.afterEach(async ({ page }) => {
+    await page.close(); // Cleanup
+});
