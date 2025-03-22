@@ -198,7 +198,7 @@ describe('loginController test', () => {
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: 'Email is not registered'
+      message: 'Invalid email or password'
     });
   });
 
@@ -214,7 +214,7 @@ describe('loginController test', () => {
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.send).toHaveBeenCalledWith({
       success: false,
-      message: 'Email is not registered'
+      message: 'Invalid email or password'
     });
   });
 

@@ -214,9 +214,9 @@ describe("Login Component", () => {
     axios.post.mockRejectedValueOnce({
       response: {
         data: {
-          message: "Email is not registered",
-        },
-      },
+          message: "Invalid email or password"
+        }
+      }
     });
 
     const { getByPlaceholderText, getByText } = renderLogin();
@@ -225,7 +225,7 @@ describe("Login Component", () => {
     fireEvent.click(getByText("LOGIN"));
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith("Email is not registered");
+      expect(toast.error).toHaveBeenCalledWith("Invalid email or password");
     });
   });
 
