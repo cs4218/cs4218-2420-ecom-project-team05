@@ -8,7 +8,7 @@ const Policy = () => {
         <div className="col-md-6 ">
           <img
             src="/images/contactus.jpeg"
-            alt="contactus"
+            alt="policy"
             style={{ width: "100%" }}
           />
         </div>

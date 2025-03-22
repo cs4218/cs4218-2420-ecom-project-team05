@@ -23,7 +23,7 @@ describe("Policy Component", () => {
 
     expect(document.title).toBe("Privacy Policy");
 
-    const image = screen.getByAltText("contactus");
+    const image = screen.getByAltText("policy");
     expect(image).toBeInTheDocument();
     expect(image).toHaveAttribute("src", "/images/contactus.jpeg");
 

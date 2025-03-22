@@ -8,7 +8,7 @@ const About = () => {
         <div className="col-md-6 ">
           <img
             src="/images/about.jpeg"
-            alt="contactus"
+            alt="about us"
             style={{ width: "100%" }}
           />
         </div>
