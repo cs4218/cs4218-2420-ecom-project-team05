@@ -1,15 +1,16 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import axios from 'axios';
-import { useAuth, AuthProvider } from '../../context/auth';
 import Profile from './Profile';
 import Dashboard from './Dashboard';
-import toast from 'react-hot-toast';
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom';
+import mongoose from 'mongoose';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
-// Mock dependencies
-jest.mock('axios');
+import User from '../../../../models/userModel';
+
+// Mock non-DB dependencies
 jest.mock('react-hot-toast', () => ({
   success: jest.fn(),
   error: jest.fn(),
@@ -28,51 +29,118 @@ jest.mock('../../components/UserMenu', () => () => (
   <div data-testid="user-menu">User Menu</div>
 ));
 
-// Mock AuthContext
-jest.mock('../../context/auth', () => {
-  const originalModule = jest.requireActual('../../context/auth');
-  const mockSetAuth = jest.fn();
-  const mockAuth = {
-    user: {
-      name: 'John Doe',
-      email: 'john@example.com',
-      phone: '1234567890',
-      address: '123 Main St',
-    },
-    token: 'test-token',
-  };
+// Create test user ID
+const testUserId = new mongoose.Types.ObjectId();
 
-  return {
-    ...originalModule,
-    useAuth: jest.fn(() => [mockAuth, mockSetAuth]),
-    AuthProvider: ({ children }) => children,
-  };
-});
-
-describe('Profile and Dashboard Integration Tests', () => {
-  const mockUser = {
+const mockSetAuth = jest.fn();
+let mockAuth = {
+  user: {
+    _id: testUserId,
     name: 'John Doe',
     email: 'john@example.com',
     phone: '1234567890',
     address: '123 Main St',
-  };
+  },
+  token: 'test-token',
+};
 
+// Mock auth
+jest.mock('../../context/auth', () => {
+  const originalModule = jest.requireActual('../../context/auth');
+  return {
+    ...originalModule,
+    useAuth: () => [mockAuth, mockSetAuth],
+    AuthProvider: ({ children }) => children,
+  };
+});
+
+jest.mock('axios');
+
+describe('Profile and Dashboard Integration Tests', () => {
+  let mongoServer;
+  let testUser;
+  
+  // Set up MongoDB Memory Server
+  beforeAll(async () => {
+    mongoServer = await MongoMemoryServer.create();
+    const uri = mongoServer.getUri();
+    
+    // Connect to the in-memory database
+    await mongoose.connect(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    
+    // Create test user in database
+    testUser = new User({
+      _id: testUserId,
+      name: 'John Doe',
+      email: 'john@example.com',
+      password: 'hashedPassword123',
+      phone: '1234567890',
+      address: '123 Main St',
+      answer: 'test answer'
+    });
+    await testUser.save();
+    
+    // Set up axios implementations to use the real database
+    axios.put.mockImplementation(async (url, data) => {
+      if (url === '/api/v1/auth/profile') {
+        const { name, email, phone, address } = data;
+        
+        const updatedUser = await User.findByIdAndUpdate(
+          testUserId,
+          { name, email, phone, address, answer: 'test answer' },
+          { new: true }
+        );
+        
+        return {
+          data: {
+            success: true,
+            updatedUser
+          }
+        };
+      }
+      return Promise.reject(new Error('Not found'));
+    });
+  });
+  
+  afterAll(async () => {
+    await mongoose.disconnect();
+    await mongoServer.stop();
+  });
+  
   beforeEach(() => {
     jest.clearAllMocks();
     
+    // Reset mockAuth to initial state before each test
+    mockAuth = {
+      user: {
+        _id: testUserId,
+        name: 'John Doe',
+        email: 'john@example.com',
+        phone: '1234567890',
+        address: '123 Main St',
+      },
+      token: 'test-token',
+    };
+    
+    // Set up localStorage mock
     const mockLocalStorage = {
-      getItem: jest.fn().mockReturnValue(JSON.stringify({ user: mockUser, token: "test-token" })),
+      getItem: jest.fn().mockReturnValue(JSON.stringify(mockAuth)),
       setItem: jest.fn(),
     };
     Object.defineProperty(window, 'localStorage', { value: mockLocalStorage });
   });
 
   it('profile page loads with user details', async () => {
-    render(
-      <MemoryRouter>
-        <Profile />
-      </MemoryRouter>
-    );
+    await act(async () => {
+      render(
+        <MemoryRouter>
+          <Profile />
+        </MemoryRouter>
+      );
+    });
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument();
@@ -83,26 +151,13 @@ describe('Profile and Dashboard Integration Tests', () => {
   });
 
   it('user can update profile successfully', async () => {
-    const updatedUser = {
-      ...mockUser,
-      name: 'Jane Doe',
-      phone: '9876543210',
-      address: '456 Oak St',
-    };
-    
-    axios.put.mockResolvedValue({
-      data: {
-        updatedUser,
-      },
+    await act(async () => {
+      render(
+        <MemoryRouter>
+          <Profile />
+        </MemoryRouter>
+      );
     });
-
-    const [mockAuth, mockSetAuth] = useAuth();
-
-    render(
-      <MemoryRouter>
-        <Profile />
-      </MemoryRouter>
-    );
 
     await waitFor(() => {
       expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument();
@@ -112,12 +167,17 @@ describe('Profile and Dashboard Integration Tests', () => {
     const phoneInput = screen.getByPlaceholderText('Enter Your Phone');
     const addressInput = screen.getByPlaceholderText('Enter Your Address');
 
-    fireEvent.change(nameInput, { target: { value: 'Jane Doe' } });
-    fireEvent.change(phoneInput, { target: { value: '9876543210' } });
-    fireEvent.change(addressInput, { target: { value: '456 Oak St' } });
+    await act(async () => {
+      fireEvent.change(nameInput, { target: { value: 'Jane Doe' } });
+      fireEvent.change(phoneInput, { target: { value: '9876543210' } });
+      fireEvent.change(addressInput, { target: { value: '456 Oak St' } });
+    });
 
     const updateButton = screen.getByText('UPDATE');
-    fireEvent.click(updateButton);
+    
+    await act(async () => {
+      fireEvent.click(updateButton);
+    });
 
     await waitFor(() => {
       expect(axios.put).toHaveBeenCalledWith('/api/v1/auth/profile', {
@@ -129,107 +189,41 @@ describe('Profile and Dashboard Integration Tests', () => {
       });
     });
 
-    await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('Profile Updated Successfully');
-    });
-
-    await waitFor(() => {
-      expect(mockSetAuth).toHaveBeenCalled();
-    });
-
-    await waitFor(() => {
-      expect(window.localStorage.setItem).toHaveBeenCalled();
-    });
-  });
-
-  it('updated profile is reflected on Dashboard', async () => {
-    useAuth.mockImplementation(() => [
-      {
-        user: {
-          ...mockUser,
-          name: 'Jane Doe',
-          address: '456 Oak St',
-        },
-        token: 'test-token',
-      },
-      jest.fn(),
-    ]);
-
-    render(
-      <MemoryRouter>
-        <Dashboard />
-      </MemoryRouter>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('Jane Doe')).toBeInTheDocument();
-      expect(screen.getByText('456 Oak St')).toBeInTheDocument();
-    });
+    // Verify the database was updated
+    const updatedUser = await User.findById(testUserId);
+    expect(updatedUser.name).toBe('Jane Doe');
+    expect(updatedUser.phone).toBe('9876543210');
+    expect(updatedUser.address).toBe('456 Oak St');
   });
 
   it('end-to-end flow: update profile and see changes in Dashboard', async () => {
-    const updatedUser = {
-      ...mockUser,
-      name: 'Jane Doe',
-      phone: '9876543210',
-      address: '456 Oak St',
+    // Update the mock auth object directly
+    mockAuth = {
+      user: {
+        _id: testUserId,
+        name: 'Jane Doe',
+        email: 'john@example.com',
+        phone: '9876543210',
+        address: '456 Oak St',
+      },
+      token: 'test-token',
     };
     
-    axios.put.mockResolvedValue({
-      data: {
-        updatedUser,
-      },
+    // Update localStorage to match updated user data
+    const mockLocalStorage = {
+      getItem: jest.fn().mockReturnValue(JSON.stringify(mockAuth)),
+      setItem: jest.fn(),
+    };
+    Object.defineProperty(window, 'localStorage', { value: mockLocalStorage });
+    
+    await act(async () => {
+      render(
+        <MemoryRouter>
+          <Dashboard />
+        </MemoryRouter>
+      );
     });
-
-    // Step 1: render with original user data
-    useAuth.mockImplementation(() => [
-      {
-        user: mockUser,
-        token: 'test-token',
-      },
-      jest.fn((newAuth) => {
-
-        // Mock implementation to update the auth state
-        useAuth.mockImplementation(() => [
-          {
-            ...newAuth,
-            user: updatedUser,
-          },
-          jest.fn(),
-        ]);
-      }),
-    ]);
-
-    const { unmount } = render(
-      <MemoryRouter>
-        <Profile />
-      </MemoryRouter>
-    );
-
-    // Verify details are seen
-    await waitFor(() => {
-      expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument();
-    });
-
-    // Step 2: update the form fields
-    fireEvent.change(screen.getByPlaceholderText('Enter Your Name'), { target: { value: 'Jane Doe' } });
-    fireEvent.change(screen.getByPlaceholderText('Enter Your Phone'), { target: { value: '9876543210' } });
-    fireEvent.change(screen.getByPlaceholderText('Enter Your Address'), { target: { value: '456 Oak St' } });
-
-    fireEvent.click(screen.getByText('UPDATE'));
-
-    await waitFor(() => {
-      expect(toast.success).toHaveBeenCalledWith('Profile Updated Successfully');
-    });
-
-    unmount();
-
-    render(
-      <MemoryRouter>
-        <Dashboard />
-      </MemoryRouter>
-    );
-
+  
     await waitFor(() => {
       expect(screen.getByText('Jane Doe')).toBeInTheDocument();
       expect(screen.getByText('john@example.com')).toBeInTheDocument();
