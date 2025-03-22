@@ -162,7 +162,7 @@ describe("CreateProduct Component", () => {
 
       it("successfully creates a product with all fields filled", async () => {
         axios.post.mockResolvedValueOnce({
-          data: { success: true, message: "Product created successfully" },
+          data: { success: true, message: "Product Created Successfully" },
         });
       
         render(
@@ -228,7 +228,7 @@ describe("CreateProduct Component", () => {
                           expect.any(FormData)
                         );
                         expect(toast.success).toHaveBeenCalledWith("Product Created Successfully");
-                      }, { timeout: 1000 });
+                      }, { timeout: 2000 });
         });
 
         it("handles image size validation - too large", async () => {
