@@ -63,7 +63,7 @@ describe("Search Component", () => {
 
     render(<Search />);
 
-    expect(screen.getByText("Search Resuts")).toBeInTheDocument();
+    expect(screen.getByText("Search Results")).toBeInTheDocument();
     expect(screen.getByText("No Products Found")).toBeInTheDocument();
   });
 
