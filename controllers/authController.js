@@ -5,6 +5,12 @@ import validator from "validator";
 import { comparePassword, hashPassword } from "./../helpers/authHelper.js";
 import JWT from "jsonwebtoken";
 
+const validateEmail = (email) => {
+  const re =
+    /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
+  return re.test(email);
+};
+
 export const registerController = async (req, res) => {
   try {
     const { name, email, password, phone, address, answer } = req.body;
@@ -73,25 +79,23 @@ export const loginController = async (req, res) => {
   try {
     const { email, password } = req.body;
     //validation
-    if (!email || !password) {
-      return res.status(404).send({
-        success: false,
-        message: "Invalid email or password",
-      });
-    }
-    //check user
+
     const user = await userModel.findOne({ email });
+
+    //check user
     if (!user) {
       return res.status(404).send({
         success: false,
-        message: "Email is not registerd",
+        message: "Email is not registered",
       });
     }
+
     const match = await comparePassword(password, user.password);
-    if (!match) {
-      return res.status(200).send({
+    const isEmailValid = validateEmail(email);
+    if (!isEmailValid || !match) {
+      return res.status(404).send({
         success: false,
-        message: "Invalid Password",
+        message: "Invalid email or password",
       });
     }
     //token
@@ -124,10 +128,11 @@ export const loginController = async (req, res) => {
 //get all users
 export const getAllUsersController = async (req, res) => {
   try {
-    const users = await userModel.find({})
+    const users = await userModel
+      .find({})
       .select("-password")
       .sort({ createdAt: -1 });
-    
+
     res.status(200).send({
       success: true,
       message: "All Users List",
