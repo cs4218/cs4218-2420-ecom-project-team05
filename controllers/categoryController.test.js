@@ -4,6 +4,7 @@ import slugify from 'slugify';
 
 // Mock dependencies
 jest.mock('../models/categoryModel');
+jest.mock('../models/productModel')
 jest.mock('slugify');
 
 describe('createCategoryController', () => {

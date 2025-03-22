@@ -97,10 +97,12 @@ const HomePage = () => {
   //get filterd product
   const filterProduct = async () => {
     try {
+      setLoading(true);
       const { data } = await axios.post("/api/v1/product/product-filters", {
         checked,
         radio,
       });
+      setLoading(false);
       setProducts(data?.products);
     } catch (error) {
       console.log(error);
