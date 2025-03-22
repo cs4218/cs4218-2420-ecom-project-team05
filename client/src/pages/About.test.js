@@ -19,7 +19,7 @@ describe("About Component", () => {
     expect(document.title).toBe("About us - Ecommerce app");
 
     // Check if image is displayed
-    const image = screen.getByAltText("contactus");
+    const image = screen.getByAltText("about us");
     expect(image).toBeInTheDocument();
     expect(image).toHaveAttribute("src", "/images/about.jpeg");
 
