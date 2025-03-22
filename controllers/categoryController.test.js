@@ -1,5 +1,6 @@
 import { createCategoryController, updateCategoryController, categoryController, singleCategoryController, deleteCategoryController } from './categoryController';
 import categoryModel from '../models/categoryModel';
+import productModel from '../models/productModel';
 import slugify from 'slugify';
 
 // Mock dependencies
@@ -78,7 +79,7 @@ describe('createCategoryController', () => {
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.send).toHaveBeenCalledWith({
       success: true,
-      message: 'new category created',
+      message: 'New category created',
       category: mockCategory
     });
   });
@@ -373,6 +374,7 @@ describe('deleteCategoryController', () => {
   });
 
   it('should successfully delete a category', async () => {
+    productModel.find = jest.fn().mockResolvedValue([]);
     categoryModel.findByIdAndDelete.mockResolvedValue({});
 
     await deleteCategoryController(req, res);

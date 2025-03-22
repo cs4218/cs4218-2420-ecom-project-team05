@@ -54,39 +54,44 @@ const ForgotPassword = () => {
             email: validateEmail(email),
             newPassword: validateNewPassword(newPassword),
             answer: validateAnswer(answer),
-          };
-          
-          setErrors(newErrors);
-          
-          return !Object.values(newErrors).some(error => error);
         };
+        
+        setErrors(newErrors);
+        
+        return !Object.values(newErrors).some(error => error);
+    };
 
     const handleSubmit = async (e) => {
-        if (loading) return;
         e.preventDefault();
+        if (loading) return;
+        
+        if (!validateForm()) {
+            return;
+        }
+        
         try {
-            setLoading(true)
+            setLoading(true);
             const res = await axios.post("/api/v1/auth/forgot-password", {
                 email,
                 newPassword,
                 answer,
-        })
+            });
 
-        if (res && res.data.success) {
-            toast.success(res.data.message);
-            setTimeout(() => {
-                navigate("/login");
-              }, 1000);
-        } else {    
-            toast.error(res.data.message);
-        }
+            if (res && res.data.success) {
+                toast.success(res.data.message);
+                setTimeout(() => {
+                    navigate("/login");
+                }, 1000);
+            } else {    
+                toast.error(res.data.message);
+            }
         } catch (error) {
             console.log(error);
-            toast.error(error.response.data.message);
+            toast.error(error.response?.data?.message || "Something went wrong");
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
     return (
         <Layout title="Forgot Password - Ecommerce App">
@@ -151,5 +156,3 @@ const ForgotPassword = () => {
     };
 
 export default ForgotPassword;
-
-    

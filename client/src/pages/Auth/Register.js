@@ -139,8 +139,23 @@ const Register = () => {
   // form function
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) {
-      return
+    
+    const newErrors = {
+      name: validateName(name),
+      email: validateEmail(email),
+      password: validatePassword(password),
+      phone: validatePhone(phone),
+      address: validateAddress(address),
+      DOB: validateDOB(DOB),
+      answer: validateAnswer(answer),
+    };
+    
+    setErrors(newErrors);
+
+    const hasErrors = Object.values(newErrors).some(error => error);
+    
+    if (hasErrors) {
+      return;
     }
 
     try {
@@ -168,7 +183,7 @@ const Register = () => {
   return (
     <Layout title="Register - Ecommerce App">
       <div className="form-container" style={{ minHeight: "90vh" }}>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <h4 className="title">REGISTER FORM</h4>
           <div className="mb-3">
           <input
