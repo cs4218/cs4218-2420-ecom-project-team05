@@ -104,12 +104,13 @@ export const deleteCategoryController = async (req, res) => {
       category: id,
     });
 
-    if (product) {
+    if (product.length > 0) {
       res.status(400).send({
         success: false,
-        message: "Error while deleting category, category belongs to existing product",
-        error,
+        message:
+          "Error while deleting category, category belongs to existing product",
       });
+      return;
     }
     await categoryModel.findByIdAndDelete(id);
     res.status(200).send({
