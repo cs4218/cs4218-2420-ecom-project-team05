@@ -12,15 +12,15 @@ test.beforeEach(async ({ page }) => {
     await page.getByRole('link', { name: 'Dashboard' }).click();
 });
 
-test.describe.serial('CRUD Product', () => {
+test.describe('CRUD Product', () => {
     test('should allow me to create a new product, update and delete successfully', async ({ page }) => {
         // create product
         await page.getByRole('link', { name: 'Create Product' }).click();
         await page.locator('#rc_select_0').click();
         await page.getByTitle('Clothing').locator('div').click();
-        await page.getByRole('textbox', { name: 'Enter a name' }).fill('pants');
-        await page.getByRole('textbox', { name: 'Enter a description' }).fill('good pants');
-        await page.getByPlaceholder('Enter a price').fill('20');
+        await page.getByRole('textbox', { name: 'Enter a name' }).fill('trousers');
+        await page.getByRole('textbox', { name: 'Enter a description' }).fill('good trousers');
+        await page.getByPlaceholder('Enter a price').fill('15');
         await page.getByPlaceholder('Enter a quantity').fill('46');
         await page.locator('#rc_select_1').click();
         await page.getByText('Yes').click();
@@ -28,28 +28,28 @@ test.describe.serial('CRUD Product', () => {
         await expect(
             page.getByRole("heading", { name: "All Products List" })
             ).toBeVisible();
-        await expect(page.getByRole("link", { name: 'pants' })).toBeVisible();
+        await expect(page.getByRole("link", { name: 'trousers' })).toBeVisible();
 
         // update product
-        await page.getByRole('link', { name: 'pants' }).click();
-        await expect(page.getByPlaceholder('Enter a description')).toContainText('good pants');
+        await page.getByRole('link', { name: 'trousers' }).click();
+        await expect(page.getByPlaceholder('Enter a description')).toContainText('good trousers');
         await page.getByRole('textbox', { name: 'Enter a name' }).click();
-        await page.getByRole('textbox', { name: 'Enter a name' }).fill('long pants');
+        await page.getByRole('textbox', { name: 'Enter a name' }).fill('long trousers');
         await page.getByRole('button', { name: 'UPDATE PRODUCT' }).click();
         await page.waitForSelector('text="Product Updated Successfully"');
         await page.getByRole('link', { name: 'Products' }).click();
         await expect(
             page.getByRole("heading", { name: "All Products List" })
             ).toBeVisible();
-        await expect(page.getByRole("link", { name: 'long pants' })).toBeVisible();
+        await expect(page.getByRole("link", { name: 'long trousers' })).toBeVisible();
 
         // delete product
         await page.getByRole('button', { name: 'Test' }).click();
         await page.getByRole('link', { name: 'Dashboard' }).click();
         await page.getByRole('link', { name: 'Products' }).click();
-        await page.getByRole('link', { name: 'long pants long pants good pants' }).click();
+        await page.getByRole('link', { name: 'long trousers long trousers good trousers' }).click();
         await expect(page.getByRole("textbox", { name: "Enter a name" })).toHaveValue(
-            'long pants'
+            'long trousers'
         );
         page.once("dialog", async (dialog) => {
             console.log(`Dialog message: ${dialog.message()}`);
@@ -57,7 +57,7 @@ test.describe.serial('CRUD Product', () => {
         });
         await page.getByRole("button", { name: "DELETE PRODUCT" }).click();
         await page.waitForSelector('text="All Products List"');
-        await expect(page.getByRole('link', { name: 'long pants long pants good pants' })).not.toBeVisible();
+        await expect(page.getByRole('link', { name: 'long trousers long trousers good trousers' })).not.toBeVisible();
     });
 
     test('should allow me to create a new product with image and delete successfully', async ({ page }) => {
@@ -65,8 +65,8 @@ test.describe.serial('CRUD Product', () => {
         await page.getByRole('link', { name: 'Create Product' }).click();
         await page.locator('#rc_select_0').click();
         await page.getByTitle('Clothing').locator('div').click();
-        await page.getByRole('textbox', { name: 'Enter a name' }).fill('pants');
-        await page.getByRole('textbox', { name: 'Enter a description' }).fill('good pants');
+        await page.getByRole('textbox', { name: 'Enter a name' }).fill('jeans');
+        await page.getByRole('textbox', { name: 'Enter a description' }).fill('good jeans');
         await page.getByText("Upload Photo").click();
         await page.getByText("Upload Photo").setInputFiles('tests/resources/pants.jpg');
         await page.getByPlaceholder('Enter a price').fill('20');
@@ -77,12 +77,12 @@ test.describe.serial('CRUD Product', () => {
         await expect(
             page.getByRole("heading", { name: "All Products List" })
             ).toBeVisible();
-        await expect(page.getByRole("link", { name: 'pants' })).toBeVisible();
+        await expect(page.getByRole("link", { name: 'jeans' })).toBeVisible();
 
         // delete product
-        await page.getByRole('link', { name: 'pants pants good pants' }).click();
+        await page.getByRole('link', { name: 'jeans jeans good jeans' }).click();
         await expect(page.getByRole("textbox", { name: "Enter a name" })).toHaveValue(
-            'pants'
+            'jeans'
         );
         page.once("dialog", async (dialog) => {
             console.log(`Dialog message: ${dialog.message()}`);
@@ -90,7 +90,7 @@ test.describe.serial('CRUD Product', () => {
         });
         await page.getByRole("button", { name: "DELETE PRODUCT" }).click();
         await page.waitForSelector('text="All Products List"');
-        await expect(page.getByRole('link', { name: 'pants pants good pants' })).not.toBeVisible();
+        await expect(page.getByRole('link', { name: 'jeans jeans good jeans' })).not.toBeVisible();
     });
 
     test('should not allow me to update a product if any field is empty', async ({ page }) => {
@@ -261,5 +261,5 @@ test.afterEach(async ({ page }) => {
 
     await page.getByRole('link', { name: 'Logout' }).click();
     await expect(page.getByRole('heading', { name: 'LOGIN FORM' })).toBeVisible();
-    await page.close(); // Cleanup
+    // await page.close(); // Cleanup
 });

@@ -21,7 +21,7 @@ test.describe.serial('Homepage', () => {
   
     const seedProducts = [
       { name: 'Product 1', slug: 'product-1', price: 10 },
-      { name: 'Product 2', slug: 'product-2', price: 20 },
+      { name: 'Product 2', slug: 'product-2', price: 25 },
       { name: 'Product 3', slug: 'product-3', price: 45 },
       { name: 'Product 4', slug: 'product-4', price: 65 },
       { name: 'Product 5', slug: 'product-5', price: 88 },
@@ -93,7 +93,7 @@ test.describe.serial('Homepage', () => {
   
     await page.getByText('$20 to').click();
     await expect(page.getByRole('heading', { name: 'Product 2' })).toBeVisible();
-    await expect(page.getByRole('heading', { name: '$20' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '$25' })).toBeVisible();
   
     await page.getByText('$40 to').click();
     await expect(page.getByRole('heading', { name: 'Product 3' })).toBeVisible();
