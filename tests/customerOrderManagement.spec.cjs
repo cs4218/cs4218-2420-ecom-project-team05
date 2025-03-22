@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("Orders Page Tests", () => {
+test.describe("Customer Orders Page Tests", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("http://localhost:3000/");
     await page.getByRole("link", { name: "Login" }).click();
