@@ -28,7 +28,7 @@ describe('Order Model Tests', () => {
     const savedOrder = await order.save();
     
     // Validate that the order has been created with the default status
-    expect(savedOrder.status).toBe('Not Process');
+    expect(savedOrder.status).toBe('Not Processed');
   });
 
   it('should have a valid status value', async () => {
@@ -66,7 +66,7 @@ describe('Order Model Tests', () => {
       products: [new mongoose.Types.ObjectId()],
       payment: {},
       buyer: new mongoose.Types.ObjectId(),
-      status: 'Not Process',
+      status: 'Not Processed',
     });
 
     const savedOrder = await order.save();

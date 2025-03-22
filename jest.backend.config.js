@@ -1,6 +1,8 @@
 export default {
   // display name
   displayName: "backend",
+  
+  preset: '@shelf/jest-mongodb',
 
   // when testing backend
   testEnvironment: "node",

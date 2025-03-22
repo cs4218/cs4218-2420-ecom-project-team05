@@ -67,7 +67,7 @@ describe("AdminOrders Component", () => {
       _id: "order1",
       status: "Not Processed",
       buyer: { name: "John Doe" },
-      createAt: new Date().toISOString(),
+      createdAt: moment().format('DD-MM-YYYY, hh:mm A'),
       payment: { success: true },
       products: [
         {_id: "product1", name: "Phone", description: "A sample", price: 99.99},
@@ -77,7 +77,7 @@ describe("AdminOrders Component", () => {
       _id: "order2",
       status: "Processing",
       buyer: { name: "Jane Doe" },
-      createAt: new Date().toISOString(),
+      createdAt: moment().format('DD-MM-YYYY, hh:mm A'),
       payment: { success: false },
       products: [
         {_id: "product2", name: "NUS TShirt", description: "A comfy shirt", price: 29.99, quantity: 2},
@@ -188,15 +188,16 @@ describe("AdminOrders Component", () => {
 
   it("should display the correct order time", async () => {
     axios.get.mockResolvedValueOnce({ data: mockOrders });
-
+  
     render(<AdminOrders />);
-
+  
     await waitFor(() => {
-      const orderTime = moment(mockOrders[0].createAt).fromNow();
-      const timeElements = screen.getAllByText(orderTime);
-      expect(timeElements[0]).toBeInTheDocument();
+      const orderTime = moment(mockOrders[0].createdAt).format('DD-MM-YYYY, hh:mm A');
+      const timeElements = screen.getAllByText(orderTime);  
+      expect(timeElements[0]).toBeInTheDocument();     
     });
   });
+  
 
   it("should correctly render multiple products in an order", async () => {
     axios.get.mockResolvedValueOnce({ data: mockOrders });

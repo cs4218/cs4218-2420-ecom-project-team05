@@ -119,7 +119,7 @@ describe("CreateProduct Component", () => {
         );
     
         await waitFor(() => {
-          expect(toast.error).toHaveBeenCalledWith("Something went wrong in getting catgeory");
+          expect(toast.error).toHaveBeenCalledWith("Something went wrong in getting category");
         });
       });
 
@@ -162,7 +162,7 @@ describe("CreateProduct Component", () => {
 
       it("successfully creates a product with all fields filled", async () => {
         axios.post.mockResolvedValueOnce({
-          data: { success: true, message: "Product created successfully" },
+          data: { success: true, message: "Product Created Successfully" },
         });
       
         render(
@@ -222,13 +222,13 @@ describe("CreateProduct Component", () => {
                         fireEvent.click(screen.getByText("CREATE PRODUCT"));
                       });
       
-          await waitFor(() => {
-            expect(axios.post).toHaveBeenCalledWith(
-              "/api/v1/product/create-product",
-              expect.any(FormData)
-            );
-            expect(toast.success).toHaveBeenCalledWith("Product Created Successfully");
-          });
+                      await waitFor(() => {
+                        expect(axios.post).toHaveBeenCalledWith(
+                          "/api/v1/product/create-product",
+                          expect.any(FormData)
+                        );
+                        expect(toast.success).toHaveBeenCalledWith("Product Created Successfully");
+                      }, { timeout: 2000 });
         });
 
         it("handles image size validation - too large", async () => {
