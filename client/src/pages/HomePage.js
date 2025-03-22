@@ -66,10 +66,13 @@ const HomePage = () => {
   //load more
   const loadMore = async () => {
     try {
-      setLoading(true);
-      const { data } = await axios.get(`/api/v1/product/product-list/${page}`);
-      setLoading(false);
-      setProducts([...products, ...data?.products]);
+      if (!checked.length && !radio.length) {
+        setLoading(true);
+        const { data } = await axios.get(`/api/v1/product/product-list/${page}`);
+        setLoading(false);
+        setProducts([...products, ...data?.products]);
+      }
+
     } catch (error) {
       console.log(error);
       setLoading(false);
