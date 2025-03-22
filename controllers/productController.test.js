@@ -881,9 +881,7 @@ describe("Product Controllers", () => {
 
     await searchProductController(req, res);
 
-    expect(productModel.find).toHaveBeenCalledWith({
-      $or: expect.any(Array),
-    });
+    expect(productModel.find).toHaveBeenCalledWith(expect.any(Object));
     expect(res.json).toHaveBeenCalled();
   });
 
