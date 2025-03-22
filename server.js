@@ -6,7 +6,6 @@ import app from "./app.js";
 
 dotenv.config();
 
-// Only connect DB and start server outside test environment
 connectDB();
 
 const PORT = process.env.PORT || 6060;
