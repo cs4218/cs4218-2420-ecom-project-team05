@@ -222,13 +222,13 @@ describe("CreateProduct Component", () => {
                         fireEvent.click(screen.getByText("CREATE PRODUCT"));
                       });
       
-          await waitFor(() => {
-            expect(axios.post).toHaveBeenCalledWith(
-              "/api/v1/product/create-product",
-              expect.any(FormData)
-            );
-            expect(toast.success).toHaveBeenCalledWith("Product Created Successfully");
-          });
+                      await waitFor(() => {
+                        expect(axios.post).toHaveBeenCalledWith(
+                          "/api/v1/product/create-product",
+                          expect.any(FormData)
+                        );
+                        expect(toast.success).toHaveBeenCalledWith("Product Created Successfully");
+                      }, { timeout: 1000 });
         });
 
         it("handles image size validation - too large", async () => {
