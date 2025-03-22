@@ -316,7 +316,7 @@ describe("CreateCategory Component", () => {
     await waitFor(() => {
       expect(axios.delete).toHaveBeenCalledWith("/api/v1/category/delete-category/1");
       
-      expect(toast.success).toHaveBeenCalledWith("category is deleted");
+      expect(toast.success).toHaveBeenCalledWith("Category Deleted Successfully");
       
       expect(axios.get).toHaveBeenCalledTimes(2);
     });
