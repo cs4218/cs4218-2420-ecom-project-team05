@@ -54,7 +54,7 @@ test.describe('Category Management', () => {
     await expect(page.locator(`text="${editedName}"`)).not.toBeVisible();
   });
 
-  test('should display error when category with products exists', async ({ page }) => {
+  test('should display error when category with products is trying to be deleted', async ({ page }) => {
         const booksRow = page.getByRole('row').filter({ hasText: 'Books' });
         await booksRow.getByRole('button', { name: 'Delete' }).click();
 
