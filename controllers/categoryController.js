@@ -20,7 +20,7 @@ export const createCategoryController = async (req, res) => {
     }).save();
     res.status(201).send({
       success: true,
-      message: "new category created",
+      message: "New category created",
       category,
     });
   } catch (error) {
@@ -100,28 +100,27 @@ export const singleCategoryController = async (req, res) => {
 export const deleteCategoryController = async (req, res) => {
   try {
     const { id } = req.params;
-    const product = await productModel.find({
+    const products = await productModel.find({
       category: id,
     });
 
-    if (product) {
-      res.status(400).send({
+    if (products.length > 0) {
+      return res.status(400).send({
         success: false,
         message: "Error while deleting category, category belongs to existing product",
-        error,
       });
     }
     await categoryModel.findByIdAndDelete(id);
-    res.status(200).send({
+    return res.status(200).send({
       success: true,
       message: "Category Deleted Successfully",
     });
   } catch (error) {
     console.log(error);
-    res.status(500).send({
+    return res.status(500).send({
       success: false,
       message: "error while deleting category",
-      error,
+      error: error,
     });
   }
 };
