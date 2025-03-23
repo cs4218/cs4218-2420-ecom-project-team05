@@ -6,12 +6,13 @@ test.describe("Customer Orders Page Tests", () => {
     await page.getByRole("link", { name: "Login" }).click();
     await page
       .getByRole("textbox", { name: "Enter Your Email" })
-      .fill("kervynadmin@admin.com");
+      .fill("kervynwork@gmail.com");
     await page.getByRole("textbox", { name: "Enter Your Email" }).press("Tab");
     await page
       .getByRole("textbox", { name: "Enter Your Password" })
       .fill("kervyn20");
     await page.getByRole("button", { name: "LOGIN" }).click();
+    await page.waitForTimeout(3000);
     await page
       .locator(
         "div:nth-child(2) > .card-body > div:nth-child(3) > button:nth-child(2)"
