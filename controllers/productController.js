@@ -366,16 +366,30 @@ export const brainTreePaymentController = async (req, res) => {
     
     // for load testing
     if (nonce === "fake-valid-nonce") {
-      // Create order without actual Braintree processing
-      const order = new orderModel({
-        products: cart,
-        payment: {
-          id: "load-test-" + Date.now(),
-          status: "authorized"
-        },
-        buyer: req.user._id,
-      }).save();
-      return res.json({ ok: true });
+      if (!req.user || !req.user._id) {
+        return res.status(401).send("User not authenticated");
+      }
+      
+      try {
+        // Create test order with await
+        const order = await new orderModel({
+          products: cart,
+          payment: {
+            transaction: {
+              id: "fake-transaction-id",
+              amount: 99,
+            },
+            status: "authorized",
+          },
+          buyer: req.user._id,
+        }).save();
+        
+        
+        return res.json({ ok: true });
+      } catch (orderError) {
+        console.log(orderError);
+        return res.status(500).send(orderError);
+      }
     }
 
     let total = 0;
