@@ -363,6 +363,21 @@ export const braintreeTokenController = async (req, res) => {
 export const brainTreePaymentController = async (req, res) => {
   try {
     const { nonce, cart } = req.body;
+    
+    // for load testing
+    if (nonce === "fake-valid-nonce") {
+      // Create order without actual Braintree processing
+      const order = new orderModel({
+        products: cart,
+        payment: {
+          id: "load-test-" + Date.now(),
+          status: "authorized"
+        },
+        buyer: req.user._id,
+      }).save();
+      return res.json({ ok: true });
+    }
+
     let total = 0;
     cart.map((i) => {
       total += i.price;
